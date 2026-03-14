@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+.env
+.env.local
+*.tsbuildinfo
+next-env.d.ts
+
+# Documents (too large for git)
+/documents/
+
+# Python
+__pycache__/
+venv/
+*.pyc
