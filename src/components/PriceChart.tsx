@@ -1,4 +1,29 @@
+'use client'
+
+import { useRef, useEffect, useState } from 'react'
+
 export function PriceChart() {
+  const ref = useRef<SVGSVGElement>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].isIntersecting) {
+            setVisible(true)
+            obs.unobserve(el)
+          }
+        }
+      },
+      { threshold: 0.2 }
+    )
+    obs.observe(el)
+    return function () { obs.disconnect() }
+  }, [])
+
   const points = [
     { min: 0, price: 0 },
     { min: 5, price: 0.50 },
@@ -21,14 +46,56 @@ export function PriceChart() {
   const peakX = x(40)
   const peakY = y(5.20)
 
+  // Approximate total line length for stroke-dasharray
+  const totalLength = 900
+
   return (
-    <svg viewBox="0 0 600 280" className="w-full" preserveAspectRatio="xMidYMid meet">
+    <svg
+      ref={ref}
+      viewBox="0 0 600 280"
+      className="w-full"
+      preserveAspectRatio="xMidYMid meet"
+    >
       <defs>
         <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#facc15" stopOpacity="0.3" />
           <stop offset="100%" stopColor="#facc15" stopOpacity="0.02" />
         </linearGradient>
       </defs>
+
+      <style>{`
+        @keyframes drawLine {
+          from { stroke-dashoffset: ${totalLength}; }
+          to { stroke-dashoffset: 0; }
+        }
+        @keyframes fadeInArea {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes fadeInLabel {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .chart-line {
+          stroke-dasharray: ${totalLength};
+          stroke-dashoffset: ${totalLength};
+        }
+        .chart-line.visible {
+          animation: drawLine 2s ease-out forwards;
+        }
+        .chart-area {
+          opacity: 0;
+        }
+        .chart-area.visible {
+          animation: fadeInArea 0.8s ease-out 1.8s forwards;
+        }
+        .chart-label {
+          opacity: 0;
+        }
+        .chart-label.visible {
+          animation: fadeInLabel 0.5s ease-out 2.2s forwards;
+        }
+      `}</style>
 
       {/* Grid lines */}
       {[1, 2, 3, 4, 5].map(v => (
@@ -39,24 +106,57 @@ export function PriceChart() {
       ))}
 
       {/* Area fill */}
-      <polygon points={areaPoints} fill="url(#priceGrad)" />
+      <polygon
+        points={areaPoints}
+        fill="url(#priceGrad)"
+        className={`chart-area${visible ? ' visible' : ''}`}
+      />
 
       {/* Price line */}
-      <polyline points={linePoints} fill="none" stroke="#d4a017" strokeWidth="2.5" strokeLinejoin="round" />
+      <polyline
+        points={linePoints}
+        fill="none"
+        stroke="#d4a017"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+        className={`chart-line${visible ? ' visible' : ''}`}
+      />
 
       {/* Vertical dashed line at peak */}
-      <line x1={peakX} y1={peakY} x2={peakX} y2={y(0)} stroke="#d4a017" strokeWidth="1" strokeDasharray="4,4" opacity="0.5" />
+      <line
+        x1={peakX} y1={peakY} x2={peakX} y2={y(0)}
+        stroke="#d4a017" strokeWidth="1" strokeDasharray="4,4" opacity="0.5"
+        className={`chart-label${visible ? ' visible' : ''}`}
+      />
 
       {/* Peak dot and label */}
-      <circle cx={peakX} cy={peakY} r="4" fill="#d4a017" />
-      <text x={peakX} y={peakY - 14} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#422006" fontFamily="ui-monospace, monospace">$5.20</text>
-      <text x={peakX} y={peakY - 28} textAnchor="middle" fontSize="9" fill="#8b7355">Pico</text>
+      <circle
+        cx={peakX} cy={peakY} r="4" fill="#d4a017"
+        className={`chart-label${visible ? ' visible' : ''}`}
+      />
+      <text
+        x={peakX} y={peakY - 14} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#422006"
+        fontFamily="ui-monospace, monospace"
+        className={`chart-label${visible ? ' visible' : ''}`}
+      >$5.20</text>
+      <text
+        x={peakX} y={peakY - 28} textAnchor="middle" fontSize="9" fill="#8b7355"
+        className={`chart-label${visible ? ' visible' : ''}`}
+      >Pico</text>
 
       {/* Crash label */}
-      <text x={x(150)} y={y(0.15) - 10} textAnchor="middle" fontSize="11" fontWeight="bold" fill="#991b1b" fontFamily="ui-monospace, monospace">$0.15</text>
+      <text
+        x={x(150)} y={y(0.15) - 10} textAnchor="middle" fontSize="11" fontWeight="bold" fill="#991b1b"
+        fontFamily="ui-monospace, monospace"
+        className={`chart-label${visible ? ' visible' : ''}`}
+      >$0.15</text>
 
       {/* "Insiders venden" label */}
-      <text x={peakX + 8} y={y(2.5)} fontSize="9" fill="#8b7355" transform={`rotate(90, ${peakX + 8}, ${y(2.5)})`}>Insiders venden</text>
+      <text
+        x={peakX + 8} y={y(2.5)} fontSize="9" fill="#8b7355"
+        transform={`rotate(90, ${peakX + 8}, ${y(2.5)})`}
+        className={`chart-label${visible ? ' visible' : ''}`}
+      >Insiders venden</text>
 
       {/* X axis labels */}
       <text x={x(0)} y="275" textAnchor="middle" fontSize="10" fill="#999" fontFamily="ui-monospace, monospace">0 min</text>

@@ -95,11 +95,10 @@ export default async function DocumentoPage({ params }: Props) {
       })
     : null
 
-  // Check if original file exists (HEAD request to nginx)
+  // Check if original file exists (HEAD request to nginx internal)
   let fileExists = false
   try {
-    const docsUrl = process.env.DOCS_PUBLIC_URL || 'http://docs:80/documents'
-    const res = await fetch(`${docsUrl}/${encodeURI(doc.file_path)}`, { method: 'HEAD' })
+    const res = await fetch(`http://docs:80/documents/${encodeURI(doc.file_path)}`, { method: 'HEAD' })
     fileExists = res.ok
   } catch {
     fileExists = false
@@ -112,7 +111,7 @@ export default async function DocumentoPage({ params }: Props) {
         href="/explorador"
         className="inline-flex items-center gap-1 text-sm text-ink-400 hover:text-ink-700 transition-colors mb-6"
       >
-        &larr; Explorador
+        &larr; Volver al archivo
       </Link>
 
       {/* Header */}

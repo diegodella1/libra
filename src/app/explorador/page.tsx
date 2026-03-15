@@ -200,17 +200,20 @@ function ExploradorContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="mb-6 text-center">
-        <h1 className="font-serif text-3xl font-bold text-ink-950">
-          Explorador de documentos
-        </h1>
-        <p className="text-ink-400 text-sm mt-1">
-          {stats
-            ? `${stats.total.toLocaleString('es-AR')} documentos en el archivo — ${stats.persons.length} personas identificadas`
-            : 'Cargando archivo...'}
-        </p>
+    <div>
+      <div className="bg-ink-950 text-white py-10 mb-6">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h1 className="font-serif text-3xl sm:text-4xl font-bold">
+            Explorador de <span className="text-gold-400">documentos</span>
+          </h1>
+          <p className="text-ink-400 text-sm mt-2">
+            {stats
+              ? `${stats.total.toLocaleString('es-AR')} documentos en el archivo — ${stats.persons.length} personas identificadas`
+              : 'Cargando archivo...'}
+          </p>
+        </div>
       </div>
+      <div className="max-w-4xl mx-auto px-4">
 
       <div className="max-w-2xl mx-auto">
         <SearchBar onSearch={handleSearch} initialValue={query} />
@@ -235,7 +238,7 @@ function ExploradorContent() {
       </div>
 
       {/* Personas como chips */}
-      <p className="text-[10px] text-ink-400 uppercase tracking-wide text-center mb-1.5">Buscar por persona</p>
+      <p className="text-[10px] text-ink-400 uppercase tracking-wide text-center mb-1.5 mt-4">Buscar por persona</p>
       <div className="flex gap-2 mb-3 flex-wrap justify-center">
         {PERSON_CHIPS.map((p) => (
           <button
@@ -252,7 +255,7 @@ function ExploradorContent() {
         ))}
       </div>
 
-      <p className="text-[10px] text-ink-400 uppercase tracking-wide text-center mb-1.5">Filtrar por fecha</p>
+      <p className="text-[10px] text-ink-400 uppercase tracking-wide text-center mb-1.5 mt-3">Filtrar por fecha</p>
       <div className="flex gap-3 mb-4 flex-wrap justify-center items-end">
         <div className="flex flex-col">
           <label className="text-[10px] text-ink-400 mb-0.5">Desde</label>
@@ -357,6 +360,7 @@ function ExploradorContent() {
           <p className="text-ink-400">No hay documentos en el archivo.</p>
         </div>
       )}
+      </div>
     </div>
   )
 }

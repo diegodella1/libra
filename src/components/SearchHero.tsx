@@ -26,7 +26,7 @@ export function SearchHero() {
           <button
             key={chip}
             onClick={() => handleSearch(chip)}
-            className="text-xs border border-ink-200 rounded-full px-3 py-1.5 text-ink-500 hover:border-gold-400 hover:text-gold-800 hover:bg-gold-50 transition-colors"
+            className="text-xs border border-ink-700 rounded-full px-3 py-1.5 text-ink-400 hover:border-gold-400 hover:text-gold-400 transition-colors"
           >
             {chip}
           </button>

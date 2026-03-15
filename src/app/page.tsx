@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { SearchHero } from '@/components/SearchHero'
 import { PersonCard } from '@/components/PersonCard'
 import type { PersonData } from '@/components/PersonCard'
+import { ScrollReveal } from '@/components/ScrollReveal'
+import { TimelineDot } from '@/components/TimelineDot'
+import { PulseIndicator } from '@/components/PulseIndicator'
 import { createClient } from '@/lib/supabase'
 
 const PERSONS: Omit<PersonData, 'docCount'>[] = [
@@ -61,37 +64,44 @@ export default async function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-4 pt-24 pb-12 text-center">
-        <h1 className="font-serif text-4xl sm:text-5xl font-bold text-ink-950 mb-3 leading-[1.1]">
-          Archivo Libra
-        </h1>
-        <p className="text-lg text-ink-500 max-w-xl mx-auto mb-10">
-          Todos los documentos judiciales de la causa por el criptoescándalo presidencial.
-          Llamadas, chats, contratos y peritajes.
-        </p>
-        <SearchHero />
-        <p className="text-sm text-ink-400 mt-3">Buscá por nombre, fecha o palabra clave</p>
-      </section>
+      <section className="bg-ink-950 text-white">
+        <div className="max-w-4xl mx-auto px-4 pt-20 pb-16 text-center">
+          <h1 className="font-serif text-4xl sm:text-6xl font-bold mb-4 leading-[1.05]">
+            Archivo <span className="text-gold-400">Libra</span>
+          </h1>
+          <p className="text-lg text-ink-300 max-w-xl mx-auto mb-10">
+            <span className="inline-flex items-center gap-2">
+              <PulseIndicator color="gold" />
+              {totalDocs.toLocaleString('es-AR')} documentos judiciales
+            </span>{' '}
+            de la causa por el criptoescándalo presidencial.
+            Llamadas, chats, contratos y peritajes.
+          </p>
+          <SearchHero />
+          <p className="text-sm text-ink-500 mt-3">Buscá por nombre, fecha o palabra clave</p>
 
-      {/* Stats row */}
-      <section className="max-w-3xl mx-auto px-4 pb-10">
-        <div className="flex justify-center gap-8 sm:gap-12 text-center">
-          {[
-            { value: '$4.5B', label: 'Capitalización pico' },
-            { value: '$251M', label: 'Pérdidas estimadas' },
-            { value: '75K', label: 'Afectados' },
-            { value: '206', label: 'Llamadas la noche del 14/02' },
-          ].map(({ value, label }) => (
-            <div key={label}>
-              <p className="text-xl sm:text-2xl font-bold text-ink-950 font-mono">{value}</p>
-              <p className="text-[10px] text-ink-400 uppercase tracking-wide font-mono mt-0.5">{label}</p>
-            </div>
-          ))}
+          {/* Separator */}
+          <div className="max-w-xl mx-auto border-t border-ink-800/30 my-4" />
+
+          {/* Stats row */}
+          <div className="flex justify-center gap-8 sm:gap-12 text-center mt-8 pt-4">
+            {[
+              { value: '$4.5B', label: 'Capitalización pico' },
+              { value: '$251M', label: 'Pérdidas estimadas' },
+              { value: '75K', label: 'Afectados' },
+              { value: '206', label: 'Llamadas la noche del 14/02' },
+            ].map(({ value, label }) => (
+              <div key={label}>
+                <p className="text-xl sm:text-2xl font-bold text-gold-400 font-mono">{value}</p>
+                <p className="text-[10px] text-ink-500 uppercase tracking-wide font-mono mt-0.5">{label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Cita editorial */}
-      <section className="max-w-3xl mx-auto px-4 pb-12">
+      <section className="max-w-3xl mx-auto px-4 pt-14 pb-12">
         <div className="border-l-4 border-gold-400 pl-6 py-3">
           <p className="text-lg text-ink-600 italic font-serif leading-relaxed">
             &ldquo;De $0,000001 a $5,20 en 40 minutos.
@@ -104,10 +114,15 @@ export default async function Home() {
 
       {/* Personas clave */}
       <section className="max-w-3xl mx-auto px-4 pb-12">
-        <h2 className="font-serif text-xl font-bold text-ink-950 mb-1 text-center">
-          Investigados y mencionados
-        </h2>
-        <p className="text-ink-400 text-sm mb-4 text-center">Tocá un nombre para ver todos sus documentos</p>
+        <ScrollReveal>
+          <h2 className="font-serif text-2xl font-bold text-ink-950 mb-1 text-center">
+            Investigados y mencionados
+          </h2>
+          <p className="text-ink-400 text-sm mb-2 text-center">
+            Los actores clave del caso, según el expediente judicial
+          </p>
+          <p className="text-ink-400 text-xs mb-5 text-center">Tocá un nombre para ver todos sus documentos</p>
+        </ScrollReveal>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {PERSONS.map((p) => (
             <PersonCard
@@ -121,49 +136,61 @@ export default async function Home() {
 
       {/* Cronología */}
       <section className="max-w-3xl mx-auto px-4 pb-14">
-        <h2 className="font-serif text-xl font-bold text-ink-950 mb-1 text-center">
-          Cronología de los hechos
-        </h2>
-        <p className="text-ink-400 text-sm mb-4 text-center">Tocá una fecha para ver los documentos de ese día</p>
-        <div className="border-l-4 border-gold-400 ml-4 pl-6 space-y-4">
+        <ScrollReveal>
+          <h2 className="font-serif text-2xl font-bold text-ink-950 mb-1 text-center">
+            Cronología de los hechos
+          </h2>
+          <p className="text-ink-400 text-sm mb-6 text-center">Tocá una fecha para ver los documentos de ese día</p>
+        </ScrollReveal>
+        <div className="space-y-4 ml-2">
           {TIMELINE.map((event, i) => (
-            <Link
-              key={i}
-              href={`/explorador?date_from=${event.from}&date_to=${event.to}`}
-              className="block group"
-            >
-              <p className="text-xs font-mono text-gold-700 group-hover:text-gold-900">
-                {event.date}
-              </p>
-              <p className="text-sm text-ink-700 group-hover:text-ink-950 transition-colors">
-                {event.text}
-              </p>
-            </Link>
+            <ScrollReveal key={i} delay={i * 80}>
+              <Link
+                href={`/explorador?date_from=${event.from}&date_to=${event.to}`}
+                className="flex items-start gap-3 group"
+              >
+                <TimelineDot />
+                <div>
+                  <p className="text-xs font-mono text-gold-700 group-hover:text-gold-900">
+                    {event.date}
+                  </p>
+                  <p className="text-sm text-ink-700 group-hover:text-ink-950 transition-colors">
+                    {event.text}
+                  </p>
+                </div>
+              </Link>
+            </ScrollReveal>
           ))}
         </div>
       </section>
 
       {/* CTAs */}
-      <section className="max-w-3xl mx-auto px-4 pb-20">
-        <div className="flex gap-4 justify-center flex-wrap">
-          <Link
-            href="/explorador"
-            className="bg-ink-950 text-white px-8 py-3.5 rounded-lg hover:bg-ink-800 transition-colors font-medium"
-          >
-            Explorar el archivo
-          </Link>
-          <Link
-            href="/red"
-            className="border border-gold-400 text-gold-800 bg-gold-50 px-8 py-3.5 rounded-lg hover:bg-gold-100 transition-colors font-medium"
-          >
-            Mapa de conexiones
-          </Link>
-          <Link
-            href="/chat"
-            className="border border-ink-300 text-ink-700 px-8 py-3.5 rounded-lg hover:border-ink-500 hover:text-ink-950 transition-colors"
-          >
-            Hacé preguntas sobre la causa
-          </Link>
+      <section className="bg-ink-950 text-white py-16">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <ScrollReveal>
+            <h2 className="font-serif text-2xl font-bold mb-2">Explorá la causa</h2>
+            <p className="text-ink-400 text-sm mb-8">Todos los documentos del expediente, accesibles y navegables</p>
+            <div className="flex gap-4 justify-center flex-wrap">
+              <Link
+                href="/explorador"
+                className="bg-gold-400 text-ink-950 px-8 py-3.5 rounded-lg hover:bg-gold-300 transition-colors font-medium"
+              >
+                Explorar el archivo
+              </Link>
+              <Link
+                href="/red"
+                className="border border-gold-400 text-gold-400 px-8 py-3.5 rounded-lg hover:bg-gold-400/10 transition-colors font-medium"
+              >
+                Mapa de conexiones
+              </Link>
+              <Link
+                href="/chat"
+                className="border border-ink-600 text-ink-300 px-8 py-3.5 rounded-lg hover:border-ink-400 hover:text-white transition-colors"
+              >
+                Hacé preguntas sobre la causa
+              </Link>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
     </div>

@@ -2,16 +2,19 @@ import Link from 'next/link'
 
 export default function About() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16">
-      <p className="text-gold-600 font-mono text-xs tracking-widest uppercase mb-6">
-        Sobre el proyecto
-      </p>
+    <div>
+      <div className="bg-ink-950 text-white py-14">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <p className="text-gold-400 font-mono text-xs tracking-widest uppercase mb-4">
+            Sobre el proyecto
+          </p>
+          <h1 className="font-serif text-4xl sm:text-5xl font-bold leading-tight">
+            Por qué existe este <span className="text-gold-400">archivo</span>
+          </h1>
+        </div>
+      </div>
 
-      <h1 className="font-serif text-4xl font-bold text-ink-950 leading-tight mb-8">
-        Por qué existe este archivo
-      </h1>
-
-      <div className="space-y-6 text-ink-600 leading-relaxed">
+      <div className="max-w-3xl mx-auto px-4 py-12 space-y-6 text-ink-600 leading-relaxed">
         <p>
           El 14 de febrero de 2025, el presidente de Argentina publicó en sus
           redes sociales el código de contrato de un token en Solana llamado $LIBRA.
@@ -111,12 +114,18 @@ export default function About() {
           <p className="text-xs text-ink-400 mt-1">— C. P. Scott, 1921</p>
         </div>
 
-        <div className="pt-8">
+        <div className="pt-8 flex gap-4 flex-wrap">
           <Link
             href="/explorador"
             className="inline-block bg-ink-950 text-white px-6 py-3 rounded-lg hover:bg-ink-800 transition-colors font-medium"
           >
             Ir al explorador
+          </Link>
+          <Link
+            href="/historia"
+            className="inline-block border border-gold-400 text-gold-800 bg-gold-50 px-6 py-3 rounded-lg hover:bg-gold-100 transition-colors font-medium"
+          >
+            Leer la historia
           </Link>
         </div>
       </div>

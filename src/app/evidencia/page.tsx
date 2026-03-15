@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { ScrollReveal } from '@/components/ScrollReveal'
 import type { Document } from '@/lib/types'
 import type { Metadata } from 'next'
 
@@ -10,10 +11,13 @@ export const metadata: Metadata = {
 
 const EVIDENCE = {
   acuerdos: [
-    'cd0f9098-b592-4d10-bddd-3ac3625d496c',
-    '582e2f26-9489-46f0-98cd-f16a2cc6911a',
-    '9cb61600-6b44-4edf-a2e5-fe0d3ceed0f6',
-    '4ce27c3c-c667-4ffd-ae11-3eddce1a541d',
+    '70aa4391-0249-433a-914d-a71c84116058', // Acuerdo final $1.5M + anuncio Twitter
+    'a22c4882-9912-4edf-abd0-9026caae78e2', // Borrador del tweet de Novelli
+    'a9fadfac-0ff9-427f-9634-83c163c124f9', // Lista "No olvidarse" (LOI, moneda, evento)
+    'cd0f9098-b592-4d10-bddd-3ac3625d496c', // LOI Kelsier → Milei
+    '582e2f26-9489-46f0-98cd-f16a2cc6911a', // Intent letter CUBE
+    '9cb61600-6b44-4edf-a2e5-fe0d3ceed0f6', // Agreement Kelsier-Peh
+    '4ce27c3c-c667-4ffd-ae11-3eddce1a541d', // Presentación Moneda de Oro
   ],
   milei: [
     '6ffaa03d-fb43-47f7-a622-6cd65ce6a8bd',
@@ -33,6 +37,8 @@ const EVIDENCE = {
     '173d809b-b00c-4fac-be98-8bc13fbf7a30',
   ],
   proyecto: [
+    'b7141951-f2d4-40f2-853f-ec14d46ed529', // Planilla distribución US$397K
+    'f8aa14ca-44d8-4dd1-9645-01ee5bd6ea48', // Planilla movimientos billeteras
     '5aba3023-d68e-4d9d-b659-7a6917d2bb91',
     '099b6326-f243-461f-a3ed-815512c76660',
     '27aa86b9-5a7f-4769-be21-cba25a3b20ee',
@@ -226,14 +232,17 @@ export default async function EvidenciaPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="max-w-3xl mx-auto px-4 pt-24 pb-14 text-center">
-        <h1 className="font-serif text-4xl sm:text-5xl font-bold text-ink-950 mb-4 leading-[1.1]">
-          Evidencia clave
-        </h1>
-        <p className="text-lg text-ink-500 max-w-xl mx-auto leading-relaxed">
-          Los documentos mas relevantes del expediente, organizados por linea de investigacion.
-          Cada pieza de evidencia enlaza al documento original completo.
-        </p>
+      <section className="bg-ink-950 text-white py-16">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <p className="text-gold-400 text-xs font-mono tracking-widest uppercase mb-4">Expediente judicial</p>
+          <h1 className="font-serif text-4xl sm:text-5xl font-bold mb-4 leading-[1.1]">
+            Evidencia <span className="text-gold-400">clave</span>
+          </h1>
+          <p className="text-lg text-ink-300 max-w-xl mx-auto leading-relaxed">
+            Los documentos mas relevantes del expediente, organizados por linea de investigacion.
+            Cada pieza de evidencia enlaza al documento original completo.
+          </p>
+        </div>
       </section>
 
       {/* Sections */}
@@ -242,21 +251,25 @@ export default async function EvidenciaPage() {
         const isAudios = section.key === 'audios'
 
         return (
-          <section key={section.key} className="max-w-3xl mx-auto px-4 pb-14">
-            {/* Section number + title */}
-            <div className="flex items-baseline gap-3 mb-3">
-              <span className="text-xs font-mono text-gold-600 bg-gold-50 border border-gold-200 rounded px-2 py-0.5 shrink-0">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <h2 className="font-serif text-2xl font-bold text-ink-950">
-                {section.title}
-              </h2>
-            </div>
+          <section key={section.key} className="max-w-3xl mx-auto px-4 pb-14 pt-6">
+            <ScrollReveal>
+              {/* Section number + title */}
+              <div className="flex items-start gap-4 mb-4">
+                <span className="text-5xl font-serif font-bold text-gold-400/20 leading-none shrink-0">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div className="pt-2">
+                  <h2 className="font-serif text-2xl font-bold text-ink-950">
+                    {section.title}
+                  </h2>
+                </div>
+              </div>
 
-            {/* Context paragraph */}
-            <p className="text-sm text-ink-600 leading-relaxed mb-5 border-l-4 border-gold-400 pl-4">
-              {section.context}
-            </p>
+              {/* Context paragraph */}
+              <p className="text-sm text-ink-600 leading-relaxed mb-6 border-l-4 border-gold-400 pl-4">
+                {section.context}
+              </p>
+            </ScrollReveal>
 
             {/* Document cards */}
             <div className="grid gap-3">
@@ -271,37 +284,46 @@ export default async function EvidenciaPage() {
                 <p className="text-sm text-ink-400 italic">Documentos no disponibles.</p>
               )}
             </div>
+
+            {/* Section divider */}
+            {i < SECTIONS.length - 1 && (
+              <div className="border-b border-ink-200 mt-10" />
+            )}
           </section>
         )
       })}
 
       {/* CTAs */}
-      <section className="max-w-3xl mx-auto px-4 pb-20">
-        <div className="border-t border-ink-200 pt-10 flex gap-4 justify-center flex-wrap">
-          <Link
-            href="/explorador"
-            className="bg-ink-950 text-white px-8 py-3.5 rounded-lg hover:bg-ink-800 transition-colors font-medium"
-          >
-            Explora todos los documentos
-          </Link>
-          <Link
-            href="/chat"
-            className="border border-ink-300 text-ink-700 px-8 py-3.5 rounded-lg hover:border-ink-500 hover:text-ink-950 transition-colors"
-          >
-            Preguntale al asistente
-          </Link>
-          <Link
-            href="/red"
-            className="border border-ink-300 text-ink-700 px-8 py-3.5 rounded-lg hover:border-ink-500 hover:text-ink-950 transition-colors"
-          >
-            Red de conexiones
-          </Link>
-          <Link
-            href="/historia"
-            className="border border-ink-300 text-ink-700 px-8 py-3.5 rounded-lg hover:border-ink-500 hover:text-ink-950 transition-colors"
-          >
-            Historia del caso
-          </Link>
+      <section className="bg-ink-950 text-white py-14">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h2 className="font-serif text-2xl font-bold mb-2">Seguí investigando</h2>
+          <p className="text-ink-400 text-sm mb-8">Navegá el archivo completo o hacé preguntas al asistente</p>
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Link
+              href="/explorador"
+              className="bg-gold-400 text-ink-950 px-8 py-3.5 rounded-lg hover:bg-gold-300 transition-colors font-medium"
+            >
+              Explora todos los documentos
+            </Link>
+            <Link
+              href="/chat"
+              className="border border-gold-400 text-gold-400 px-8 py-3.5 rounded-lg hover:bg-gold-400/10 transition-colors font-medium"
+            >
+              Preguntale al asistente
+            </Link>
+            <Link
+              href="/red"
+              className="border border-ink-600 text-ink-300 px-8 py-3.5 rounded-lg hover:border-ink-400 hover:text-white transition-colors"
+            >
+              Red de conexiones
+            </Link>
+            <Link
+              href="/historia"
+              className="border border-ink-600 text-ink-300 px-8 py-3.5 rounded-lg hover:border-ink-400 hover:text-white transition-colors"
+            >
+              Historia del caso
+            </Link>
+          </div>
         </div>
       </section>
     </div>

@@ -5,6 +5,7 @@ import { authFetch } from '@/lib/api'
 import { StatCard } from '@/components/charts/StatCard'
 import { HBarChart } from '@/components/charts/HBarChart'
 import { DateChart } from '@/components/charts/DateChart'
+import { ScrollReveal } from '@/components/ScrollReveal'
 
 // Type colors matching DocumentRow TYPE_CONFIG
 const TYPE_COLORS: Record<string, string> = {
@@ -58,18 +59,26 @@ export default function DatosPage() {
 
   if (loading) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-8 text-center">
-        <h1 className="font-serif text-3xl font-bold text-ink-950 mb-2">Datos del caso</h1>
-        <p className="text-ink-400 font-mono text-sm mt-8">Cargando datos...</p>
+      <div>
+        <div className="bg-ink-950 text-white py-10">
+          <div className="max-w-5xl mx-auto px-4 text-center">
+            <h1 className="font-serif text-3xl sm:text-4xl font-bold">Datos del <span className="text-gold-400">caso</span></h1>
+          </div>
+        </div>
+        <p className="text-ink-400 font-mono text-sm mt-8 text-center">Cargando datos...</p>
       </div>
     )
   }
 
   if (!stats) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-8 text-center">
-        <h1 className="font-serif text-3xl font-bold text-ink-950">Datos del caso</h1>
-        <p className="text-red-500 text-sm mt-4">Error cargando datos.</p>
+      <div>
+        <div className="bg-ink-950 text-white py-10">
+          <div className="max-w-5xl mx-auto px-4 text-center">
+            <h1 className="font-serif text-3xl sm:text-4xl font-bold">Datos del <span className="text-gold-400">caso</span></h1>
+          </div>
+        </div>
+        <p className="text-red-500 text-sm mt-4 text-center">Error cargando datos.</p>
       </div>
     )
   }
@@ -87,20 +96,24 @@ export default function DatosPage() {
     })
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="text-center mb-8">
-        <h1 className="font-serif text-3xl font-bold text-ink-950">Datos del caso</h1>
-        <p className="text-ink-400 text-sm mt-1">
-          Radiografia del archivo: {stats.total.toLocaleString('es-AR')} documentos analizados
-        </p>
+    <div>
+      <div className="bg-ink-950 text-white py-10 mb-8">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <p className="text-gold-400 text-xs font-mono tracking-widest uppercase mb-3">Radiografia</p>
+          <h1 className="font-serif text-3xl sm:text-4xl font-bold">Datos del <span className="text-gold-400">caso</span></h1>
+          <p className="text-ink-400 text-sm mt-2">
+            {stats.total.toLocaleString('es-AR')} documentos analizados
+          </p>
+        </div>
       </div>
 
+      <div className="max-w-5xl mx-auto px-4">
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <StatCard value={stats.total.toLocaleString('es-AR')} label="Documentos" context="en el archivo" />
-        <StatCard value="75.000" label="Afectados" context="perdieron dinero" />
-        <StatCard value="US$251M" label="Perdidas" context="estimadas" />
-        <StatCard value="206" label="Llamadas" context="noche del 14/02" />
+        <ScrollReveal delay={0}><StatCard value={stats.total.toLocaleString('es-AR')} label="Documentos" context="en el archivo" /></ScrollReveal>
+        <ScrollReveal delay={100}><StatCard value="75.000" label="Afectados" context="perdieron dinero" /></ScrollReveal>
+        <ScrollReveal delay={200}><StatCard value="US$251M" label="Perdidas" context="estimadas" /></ScrollReveal>
+        <ScrollReveal delay={300}><StatCard value="206" label="Llamadas" context="noche del 14/02" /></ScrollReveal>
       </div>
 
       {/* Charts */}
@@ -117,6 +130,7 @@ export default function DatosPage() {
             Ver mapa de conexiones
           </a>
         </div>
+      </div>
       </div>
     </div>
   )

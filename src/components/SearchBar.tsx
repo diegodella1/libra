@@ -55,7 +55,7 @@ export function SearchBar({ onSearch, initialValue = '' }: SearchBarProps) {
       </div>
       <button
         type="submit"
-        className="bg-ink-950 text-white px-6 py-3.5 rounded-xl hover:bg-ink-800 transition-colors font-medium"
+        className="bg-gold-400 text-ink-950 px-6 py-3.5 rounded-xl hover:bg-gold-300 transition-colors font-medium"
       >
         Buscar
       </button>

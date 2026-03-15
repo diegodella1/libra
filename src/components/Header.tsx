@@ -7,11 +7,9 @@ import Link from 'next/link'
 const NAV_LINKS = [
   { href: '/historia', label: 'La historia' },
   { href: '/evidencia', label: 'Evidencia' },
-  { href: '/explorador', label: 'Explorador' },
-  { href: '/red', label: 'Red' },
-  { href: '/datos', label: 'Datos' },
+  { href: '/explorador', label: 'Archivo' },
+  { href: '/red', label: 'Conexiones' },
   { href: '/chat', label: 'Asistente' },
-  { href: '/about', label: 'Sobre el proyecto' },
 ]
 
 export function Header() {
@@ -27,6 +25,7 @@ export function Header() {
 
   return (
     <header className="border-b border-ink-200 bg-white">
+      <div className="h-0.5 bg-gold-400" />
       <nav className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <span className="font-serif text-xl font-bold text-ink-950">Archivo Libra</span>

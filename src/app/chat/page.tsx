@@ -5,6 +5,29 @@ import Link from 'next/link'
 import { authFetch } from '@/lib/api'
 import type { ChatEntry, ChatResponse } from '@/lib/types'
 
+function renderMarkdown(text: string): string {
+  // First: strip any HTML the LLM may have generated
+  let clean = text.replace(/<[^>]*>/g, '')
+
+  // Links: [text](/documento/uuid) → clickable link
+  clean = clean.replace(/\[([^\]]+)\]\(\/documento\/([^)\s]+)\)/g,
+    '<a href="/documento/$2" class="chat-link">$1</a>')
+  // Links: [text](https://...) → external link
+  clean = clean.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener" class="chat-link">$1</a>')
+  // Links: [text](/path) → internal link
+  clean = clean.replace(/\[([^\]]+)\]\(\/([^)\s]+)\)/g,
+    '<a href="/$2" class="chat-link">$1</a>')
+
+  // Bold: **text**
+  clean = clean.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+
+  // Newlines
+  clean = clean.replace(/\n/g, '<br/>')
+
+  return clean
+}
+
 const SUGGESTED_PROMPTS = [
   '¿Qué pasó la noche del 14 de febrero de 2025?',
   '¿Con quién se comunicó Karina Milei?',
@@ -96,7 +119,7 @@ export default function ChatPage() {
                 <button
                   key={prompt}
                   onClick={() => sendMessage(prompt)}
-                  className="text-left text-sm text-ink-600 border border-ink-200 rounded-xl px-4 py-3 hover:border-gold-400 hover:bg-gold-50 transition-colors"
+                  className="text-left text-sm text-ink-600 border border-ink-200 rounded-xl px-4 py-3 hover:border-gold-400 hover:bg-gold-50 transition-all duration-200 hover:translate-y-[-1px] hover:shadow-sm"
                 >
                   {prompt}
                 </button>
@@ -108,13 +131,14 @@ export default function ChatPage() {
             {messages.map((msg, i) => (
               <div key={i}>
                 <div
-                  className={`rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                  className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-gold-50 border border-gold-200 rounded-br-sm ml-auto max-w-[80%]'
-                      : 'bg-white border border-ink-200 rounded-bl-sm mr-auto max-w-[80%]'
+                      ? 'bg-gold-50 border border-gold-200 rounded-br-sm ml-auto max-w-[80%] whitespace-pre-wrap'
+                      : 'bg-white border border-ink-200 rounded-bl-sm mr-auto max-w-[80%] chat-message'
                   }`}
+                  dangerouslySetInnerHTML={msg.role === 'assistant' ? { __html: renderMarkdown(msg.content) } : undefined}
                 >
-                  {msg.content}
+                  {msg.role === 'user' ? msg.content : undefined}
                 </div>
                 {msg.role === 'assistant' && msg.sources && msg.sources.length > 0 && (
                   <div className="mt-2 mr-auto max-w-[80%]">

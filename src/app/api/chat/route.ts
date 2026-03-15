@@ -147,16 +147,29 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // 4. Build context
-  const context = allResults
-    .slice(0, 15)
+  // 4. Build context — prioritize docs with content, give more text
+  const rankedResults = allResults
+    .slice(0, 20)
+    .sort((a: any, b: any) => {
+      const aLen = (a.chunk_content || a.snippet || '').length
+      const bLen = (b.chunk_content || b.snippet || '').length
+      return bLen - aLen // docs with more content first
+    })
+
+  const context = rankedResults
+    .slice(0, 12)
     .map((doc: any) => {
       const content = doc.chunk_content || doc.snippet || ''
-      const parts = [`[${doc.title || 'Sin título'}, tipo: ${doc.doc_type}, ${doc.date || 'sin fecha'}, ID: ${doc.id}]`]
+      const parts = [
+        `DOCUMENTO: ${doc.title || 'Sin título'}`,
+        `Tipo: ${doc.doc_type} | Fecha: ${doc.date || 'sin fecha'} | ID: ${doc.id}`,
+      ]
       if (doc.participants && doc.participants.length > 0) {
         parts.push(`Participantes: ${doc.participants.join(', ')}`)
       }
-      parts.push(content)
+      if (content) {
+        parts.push(`Contenido:\n${content}`)
+      }
       return parts.join('\n')
     })
     .join('\n\n---\n\n')

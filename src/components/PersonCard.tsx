@@ -18,7 +18,7 @@ export function PersonCard({ name, role, searchTerm, docCount }: PersonData) {
   return (
     <Link
       href={`/explorador?q=${encodeURIComponent(searchTerm)}`}
-      className="flex items-center gap-3 p-3 rounded-lg border border-ink-200 bg-white hover:border-gold-400 hover:bg-gold-50/50 transition-colors group"
+      className="flex items-center gap-3 p-3 rounded-lg border border-ink-200 bg-white hover:border-gold-400 hover:bg-gold-50/50 transition-all duration-200 hover:translate-y-[-2px] hover:shadow-sm group"
     >
       <div className="w-10 h-10 rounded-full bg-gold-100 text-gold-800 flex items-center justify-center font-bold text-sm shrink-0">
         {initials}

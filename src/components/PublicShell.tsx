@@ -41,13 +41,16 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f6f6f9] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-ink-950 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-serif text-3xl font-bold text-ink-950 mb-2">Archivo Libra</h1>
-          <p className="text-sm text-ink-400">Acceso restringido. Ingresá el token de acceso.</p>
+          <p className="text-gold-400 text-xs font-mono tracking-widest uppercase mb-4">Acceso restringido</p>
+          <h1 className="font-serif text-4xl font-bold text-white mb-2">
+            Archivo <span className="text-gold-400">Libra</span>
+          </h1>
+          <p className="text-sm text-ink-400">Ingresá el token de acceso para continuar.</p>
         </div>
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-ink-200 p-6 shadow-sm">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-ink-200 p-6 shadow-lg">
           <label htmlFor="token" className="block text-xs text-ink-500 mb-1.5 font-mono uppercase tracking-wide">
             Token de acceso
           </label>
@@ -146,28 +149,42 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         </svg>
       </Link>
 
-      <footer className="border-t border-ink-200 py-8">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-ink-400 font-mono uppercase tracking-wide">
-            Archivo Libra — Documentos de acceso público
-          </p>
-          <nav className="flex gap-4 text-xs text-ink-400">
-            <Link href="/explorador" className="hover:text-ink-700 transition-colors">
-              Explorador
-            </Link>
-            <Link href="/historia" className="hover:text-ink-700 transition-colors">
-              Historia
-            </Link>
-            <Link href="/evidencia" className="hover:text-ink-700 transition-colors">
-              Evidencia
-            </Link>
-            <Link href="/chat" className="hover:text-ink-700 transition-colors">
-              Asistente
-            </Link>
-            <Link href="/about" className="hover:text-ink-700 transition-colors">
-              Sobre el proyecto
-            </Link>
-          </nav>
+      <footer className="bg-ink-950 text-ink-400 py-12">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h4 className="font-serif text-white text-sm font-bold mb-3">Archivo Libra</h4>
+              <p className="text-xs leading-relaxed">
+                Archivo periodístico de documentos judiciales públicos del caso por el token $LIBRA.
+                Toda la información proviene del expediente del Juzgado Federal N°8.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-xs font-mono uppercase tracking-wide text-ink-500 mb-3">Navegar</h4>
+              <nav className="flex flex-col gap-2 text-xs">
+                <Link href="/historia" className="hover:text-white transition-colors">La historia</Link>
+                <Link href="/evidencia" className="hover:text-white transition-colors">Evidencia clave</Link>
+                <Link href="/explorador" className="hover:text-white transition-colors">Explorar archivo</Link>
+                <Link href="/red" className="hover:text-white transition-colors">Red de conexiones</Link>
+                <Link href="/datos" className="hover:text-white transition-colors">Datos y estadísticas</Link>
+              </nav>
+            </div>
+            <div>
+              <h4 className="text-xs font-mono uppercase tracking-wide text-ink-500 mb-3">Sobre el proyecto</h4>
+              <nav className="flex flex-col gap-2 text-xs">
+                <Link href="/about" className="hover:text-white transition-colors">Metodología</Link>
+                <Link href="/chat" className="hover:text-white transition-colors">Asistente de investigación</Link>
+              </nav>
+            </div>
+          </div>
+          <div className="border-t border-ink-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-ink-600">
+              Archivo Libra — Documentos de acceso público
+            </p>
+            <p className="text-[10px] text-ink-600">
+              Los documentos provienen del expediente judicial público. Sin edición ni interpretación.
+            </p>
+          </div>
         </div>
       </footer>
     </>
