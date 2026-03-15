@@ -5,23 +5,39 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        libra: {
-          50: '#f8f7f4',
-          100: '#efede6',
-          200: '#ddd8ca',
-          300: '#c7bea7',
-          400: '#b0a183',
-          500: '#9f8d6b',
-          600: '#927d5f',
-          700: '#7a6750',
-          800: '#645445',
-          900: '#52463a',
-          950: '#2b241e',
+        // Oro barato — la avaricia ingenua
+        gold: {
+          50: '#fefce8',
+          100: '#fef9c3',
+          200: '#fef08a',
+          300: '#fde047',
+          400: '#facc15',
+          500: '#eab308',
+          600: '#ca8a04',
+          700: '#a16207',
+          800: '#854d0e',
+          900: '#713f12',
+          950: '#422006',
+        },
+        // Tinta — el peso del expediente
+        ink: {
+          50: '#f6f6f9',
+          100: '#ededf1',
+          200: '#d7d7e0',
+          300: '#b3b4c5',
+          400: '#8a8ba5',
+          500: '#6b6c8b',
+          600: '#565672',
+          700: '#47465d',
+          800: '#3d3c4f',
+          900: '#272733',
+          950: '#1a1a22',
         },
       },
       fontFamily: {
         serif: ['Georgia', 'Cambria', 'Times New Roman', 'serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'Fira Code', 'monospace'],
       },
     },
   },

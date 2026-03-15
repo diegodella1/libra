@@ -36,7 +36,7 @@ export async function PATCH(
 
   const { id } = await params
   const body = await request.json()
-  const { title, doc_type, date, participants, tags, content } = body
+  const { title, doc_type, date, participants, tags, content, ocr_status } = body
 
   const supabase = createClient()
 
@@ -47,6 +47,7 @@ export async function PATCH(
   if (participants !== undefined) updates.participants = participants
   if (tags !== undefined) updates.tags = tags
   if (content !== undefined) updates.content = content
+  if (ocr_status !== undefined) updates.ocr_status = ocr_status
 
   const { data, error } = await supabase
     .from('documents')

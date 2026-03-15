@@ -71,10 +71,15 @@ export default function About() {
             el original (PDF o imagen) junto a la transcripción, lado a lado.
           </li>
           <li>
+            <strong className="text-ink-800">Red de conexiones</strong> — Un mapa visual
+            interactivo que muestra las relaciones entre las personas involucradas,
+            basado en los documentos que comparten.
+          </li>
+          <li>
             <strong className="text-ink-800">Asistente</strong> — Un chatbot que
             responde preguntas citando exclusivamente los documentos. Cruza
-            información entre documentos para encontrar conexiones. No opina,
-            no especula, no interpreta.
+            información entre documentos y busca por persona para encontrar conexiones.
+            No opina, no especula, no interpreta.
           </li>
         </ul>
 

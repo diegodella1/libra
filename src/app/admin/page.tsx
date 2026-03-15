@@ -50,6 +50,7 @@ const TYPE_LABELS: Record<string, string> = {
   rrss: 'Redes sociales',
   pdf: 'PDFs',
   llamadas: 'Llamadas',
+  audio: 'Audio',
   transcripcion: 'Transcripciones',
   otro: 'Otros',
 }

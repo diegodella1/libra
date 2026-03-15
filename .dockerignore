@@ -2,6 +2,8 @@ node_modules/
 .next/
 .git/
 documents/
+docs/
 venv/
 __pycache__/
+.claude/
 *.md

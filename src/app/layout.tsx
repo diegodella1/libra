@@ -1,11 +1,29 @@
 import type { Metadata } from 'next'
+import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
-import { Header } from '@/components/Header'
-import { ChatWidget } from '@/components/ChatWidget'
+import { PublicShell } from '@/components/PublicShell'
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-sans',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-mono',
+})
 
 export const metadata: Metadata = {
   title: 'Archivo Libra',
-  description: 'Archivo periodístico de documentos judiciales públicos. Explorá, buscá y consultá transcripciones y documentos de la causa.',
+  description: 'Archivo periodístico de documentos judiciales públicos. Transcripciones, pruebas y documentos de la causa del token.',
+  openGraph: {
+    title: 'Archivo Libra',
+    description: 'Todos los documentos públicos de la causa por el token $LIBRA. Transcripciones, peritajes, llamadas, pruebas.',
+    locale: 'es_AR',
+    type: 'website',
+  },
 }
 
 export default function RootLayout({
@@ -14,16 +32,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es">
-      <body>
-        <Header />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <ChatWidget />
-        <footer className="border-t border-libra-200 py-8 text-center text-sm text-libra-500">
-          <p>Archivo Libra — Documentos de acceso público</p>
-        </footer>
+    <html lang="es" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+      <body className="font-sans text-ink-950">
+        <PublicShell>{children}</PublicShell>
       </body>
     </html>
   )

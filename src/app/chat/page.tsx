@@ -2,13 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { authFetch } from '@/lib/api'
 import type { ChatEntry, ChatResponse } from '@/lib/types'
 
 const SUGGESTED_PROMPTS = [
-  '¿Qué llamadas hubo la noche del 14 de febrero?',
-  '¿Cuál es la conexión entre Milei y Hayden Davis?',
-  '¿Qué dice el peritaje de DATIP sobre las llamadas?',
-  '¿Quién es Diógenes Casares y qué reveló sobre las coimas?',
+  '¿Qué pasó la noche del 14 de febrero de 2025?',
+  '¿Con quién se comunicó Karina Milei?',
+  '¿Qué dice el acuerdo entre Milei y Hayden Davis?',
+  '¿Cuál fue el rol de Mauricio Novelli en la causa?',
 ]
 
 export default function ChatPage() {
@@ -41,7 +42,7 @@ export default function ChatPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await authFetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,10 +83,13 @@ export default function ChatPage() {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full px-4">
             <h1 className="font-serif text-3xl sm:text-4xl text-ink-950 mb-2">
-              Asistente Libra
+              Asistente de investigacion
             </h1>
-            <p className="text-ink-400 text-sm mb-10">
-              Preguntame sobre los documentos de la causa
+            <p className="text-ink-400 text-sm mb-2">
+              Haceme preguntas sobre los documentos del caso $LIBRA
+            </p>
+            <p className="text-ink-300 text-xs mb-10">
+              Las respuestas se basan exclusivamente en los documentos del archivo. No opina ni especula.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full">
               {SUGGESTED_PROMPTS.map((prompt) => (
@@ -113,7 +117,9 @@ export default function ChatPage() {
                   {msg.content}
                 </div>
                 {msg.role === 'assistant' && msg.sources && msg.sources.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2 mr-auto max-w-[80%]">
+                  <div className="mt-2 mr-auto max-w-[80%]">
+                    <p className="text-[10px] text-ink-400 uppercase tracking-wide mb-1">Fuentes consultadas</p>
+                    <div className="flex flex-wrap gap-1.5">
                     {msg.sources.map((src) => (
                       <Link
                         key={src.id}
@@ -126,6 +132,7 @@ export default function ChatPage() {
                         {src.title || 'Documento'}
                       </Link>
                     ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -153,7 +160,7 @@ export default function ChatPage() {
               autoResize()
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Tu consulta..."
+            placeholder="Escribi tu pregunta sobre la causa..."
             disabled={loading}
             rows={1}
             className="chat-input flex-1 border border-ink-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400 bg-white placeholder:text-ink-300 disabled:opacity-50"

@@ -3,7 +3,50 @@
 @tailwind utilities;
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  color: #2b241e;
-  background-color: #f8f7f4;
+  background-color: #f6f6f9;
+}
+
+/* Focus visible global */
+*:focus-visible {
+  outline: 2px solid #facc15;
+  outline-offset: 2px;
+}
+
+/* Accesibilidad: respetar preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Highlight de búsqueda */
+mark {
+  background-color: #fef08a;
+  color: #422006;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* Scrollbar sutil */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d7d7e0;
+  border-radius: 3px;
+}
+
+/* Chat */
+.chat-messages::-webkit-scrollbar {
+  width: 0;
+}
+.chat-input {
+  min-height: 48px;
+  max-height: 200px;
 }

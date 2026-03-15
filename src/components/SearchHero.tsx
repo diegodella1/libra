@@ -5,10 +5,10 @@ import { SearchBar } from '@/components/SearchBar'
 
 const SUGGESTED_CHIPS = [
   'Hayden Davis',
-  'llamadas 14 de febrero',
-  'peritaje DATIP',
-  'Kelsier Ventures',
-  'coimas US$5M',
+  'noche del 14 de febrero',
+  'acuerdo confidencial',
+  'llamadas Novelli',
+  'Karina Milei',
 ]
 
 export function SearchHero() {

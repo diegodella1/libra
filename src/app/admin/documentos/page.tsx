@@ -84,6 +84,7 @@ export default function AdminDocumentosPage() {
           <option value="forense">Forense</option>
           <option value="rrss">Redes sociales</option>
           <option value="llamadas">Llamadas</option>
+          <option value="audio">Audio</option>
           <option value="transcripcion">Transcripciones</option>
         </select>
       </div>
@@ -129,6 +130,13 @@ export default function AdminDocumentosPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right space-x-2">
+                    <Link
+                      href={`/documento/${doc.id}`}
+                      target="_blank"
+                      className="text-blue-500 hover:text-blue-700 text-xs underline"
+                    >
+                      Ver
+                    </Link>
                     <Link
                       href={`/admin/documentos/${doc.id}`}
                       className="text-ink-500 hover:text-ink-900 text-xs underline"

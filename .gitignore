@@ -13,3 +13,5 @@ next-env.d.ts
 __pycache__/
 venv/
 *.pyc
+docs/
+*.zip

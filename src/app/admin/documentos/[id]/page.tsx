@@ -3,6 +3,31 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
+const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL || '/documents'
+
+const DOC_TYPES = [
+  { value: 'conversacion', label: 'Conversación' },
+  { value: 'documento', label: 'Documento' },
+  { value: 'texto', label: 'Texto' },
+  { value: 'pdf', label: 'PDF' },
+  { value: 'presentacion', label: 'Presentación' },
+  { value: 'planilla', label: 'Planilla' },
+  { value: 'forense', label: 'Forense' },
+  { value: 'rrss', label: 'RRSS' },
+  { value: 'llamadas', label: 'Llamadas' },
+  { value: 'audio', label: 'Audio' },
+  { value: 'imagen', label: 'Imagen' },
+  { value: 'transcripcion', label: 'Transcripción' },
+  { value: 'otro', label: 'Otro' },
+]
+
+const OCR_STATUSES = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'done', label: 'Done' },
+  { value: 'skipped', label: 'Skipped' },
+  { value: 'error', label: 'Error' },
+]
+
 interface DocDetail {
   id: string
   title: string | null
@@ -12,6 +37,8 @@ interface DocDetail {
   tags: string[]
   content: string | null
   file_path: string
+  ocr_status: string
+  duration_seconds: number | null
 }
 
 export default function AdminEditDocPage() {
@@ -29,6 +56,8 @@ export default function AdminEditDocPage() {
   const [date, setDate] = useState('')
   const [participants, setParticipants] = useState('')
   const [tags, setTags] = useState('')
+  const [content, setContent] = useState('')
+  const [ocrStatus, setOcrStatus] = useState('pending')
 
   useEffect(() => {
     fetch(`/api/admin/documents/${id}`)
@@ -40,6 +69,8 @@ export default function AdminEditDocPage() {
         setDate(data.date || '')
         setParticipants((data.participants || []).join(', '))
         setTags((data.tags || []).join(', '))
+        setContent(data.content || '')
+        setOcrStatus(data.ocr_status || 'pending')
       })
       .catch(console.error)
       .finally(() => setLoading(false))
@@ -60,6 +91,8 @@ export default function AdminEditDocPage() {
         date: date || null,
         participants: participants ? participants.split(',').map((s) => s.trim()).filter(Boolean) : [],
         tags: tags ? tags.split(',').map((s) => s.trim()).filter(Boolean) : [],
+        content: content || null,
+        ocr_status: ocrStatus,
       }),
     })
 
@@ -74,6 +107,8 @@ export default function AdminEditDocPage() {
 
   if (loading) return <p className="text-ink-500 text-sm py-8">Cargando...</p>
   if (!doc) return <p className="text-red-600 text-sm py-8">Documento no encontrado</p>
+
+  const fileUrl = `${DOCS_URL}/${doc.file_path}`
 
   return (
     <div>
@@ -95,7 +130,7 @@ export default function AdminEditDocPage() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1">Tipo</label>
             <select
@@ -103,9 +138,21 @@ export default function AdminEditDocPage() {
               onChange={(e) => setDocType(e.target.value)}
               className="w-full px-3 py-2 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-gold-400 bg-white"
             >
-              <option value="transcripcion">Transcripción</option>
-              <option value="imagen">Imagen</option>
-              <option value="otro">Otro</option>
+              {DOC_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1">OCR Status</label>
+            <select
+              value={ocrStatus}
+              onChange={(e) => setOcrStatus(e.target.value)}
+              className="w-full px-3 py-2 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-gold-400 bg-white"
+            >
+              {OCR_STATUSES.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
             </select>
           </div>
           <div>
@@ -141,6 +188,18 @@ export default function AdminEditDocPage() {
           />
         </div>
 
+        <details>
+          <summary className="cursor-pointer text-sm font-medium text-ink-700">
+            Content {content ? `(${content.length.toLocaleString()} chars)` : '(vacío)'}
+          </summary>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={12}
+            className="mt-2 w-full px-3 py-2 border border-ink-300 rounded-lg text-xs font-mono outline-none focus:ring-2 focus:ring-gold-400"
+          />
+        </details>
+
         <div className="text-xs text-ink-400">
           Archivo: <span className="font-mono">{doc.file_path}</span>
         </div>
@@ -158,6 +217,24 @@ export default function AdminEditDocPage() {
           </button>
         </div>
       </form>
+
+      {/* File Preview */}
+      <div className="mt-6 bg-white rounded-xl border border-ink-200 overflow-hidden max-w-2xl">
+        <div className="px-4 py-2 bg-ink-50 text-xs font-mono text-ink-500 border-b border-ink-200 uppercase tracking-wide">
+          Preview
+        </div>
+        <div className="p-4">
+          {docType === 'audio' ? (
+            <audio controls preload="metadata" className="w-full">
+              <source src={fileUrl} />
+            </audio>
+          ) : docType === 'imagen' ? (
+            <img src={fileUrl} alt={title || 'Documento'} loading="lazy" className="w-full rounded" />
+          ) : (
+            <iframe src={fileUrl} className="w-full h-[60vh] rounded" title={title || 'Documento'} />
+          )}
+        </div>
+      </div>
     </div>
   )
 }
