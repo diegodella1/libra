@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: '/historia', label: 'La historia' },
   { href: '/evidencia', label: 'Evidencia' },
   { href: '/explorador', label: 'Archivo' },
+  { href: '/entidades', label: 'Entidades' },
   { href: '/red', label: 'Conexiones' },
   { href: '/chat', label: 'Asistente' },
 ]

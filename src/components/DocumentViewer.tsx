@@ -2,6 +2,12 @@
 
 import { ForensicContent } from '@/components/ForensicContent'
 
+interface EntityMatch {
+  id: string
+  entity_type: string
+  value: string
+}
+
 interface DocumentViewerProps {
   filePath: string
   content: string | null
@@ -9,6 +15,7 @@ interface DocumentViewerProps {
   title?: string
   durationSeconds?: number | null
   fileExists?: boolean
+  entities?: EntityMatch[]
 }
 
 const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL || '/documents'
@@ -51,7 +58,7 @@ function getAudioContext(filePath: string): { device: string; chatWith: string |
   return { device, chatWith: chatWith || null }
 }
 
-export function DocumentViewer({ filePath, content, docType, title, durationSeconds, fileExists }: DocumentViewerProps) {
+export function DocumentViewer({ filePath, content, docType, title, durationSeconds, fileExists, entities }: DocumentViewerProps) {
   const fileUrl = `${DOCS_URL}/${filePath}`
   const altText = title ? `Documento: ${title}` : 'Documento original'
   const showOriginal = !CONTENT_ONLY_TYPES.includes(docType) && fileExists !== false
@@ -98,7 +105,7 @@ export function DocumentViewer({ filePath, content, docType, title, durationSeco
               Transcripcion
             </div>
             <div className="p-6 overflow-y-auto max-h-[80vh]">
-              <ForensicContent content={content} docType={docType} />
+              <ForensicContent content={content} docType={docType} entities={entities} />
             </div>
           </div>
         )}
@@ -137,7 +144,7 @@ export function DocumentViewer({ filePath, content, docType, title, durationSeco
         </div>
         <div className="p-6 overflow-y-auto max-h-[80vh]">
           {content ? (
-            <ForensicContent content={content} docType={docType} />
+            <ForensicContent content={content} docType={docType} entities={entities} />
           ) : (
             <p className="text-ink-300 italic text-sm">
               Este documento no tiene contenido de texto disponible.
@@ -208,7 +215,7 @@ export function DocumentViewer({ filePath, content, docType, title, durationSeco
         </div>
         <div className="p-6 overflow-y-auto max-h-[80vh]">
           {content ? (
-            <ForensicContent content={content} docType={docType} />
+            <ForensicContent content={content} docType={docType} entities={entities} />
           ) : (
             <p className="text-ink-300 italic text-sm">
               Transcripcion no disponible.

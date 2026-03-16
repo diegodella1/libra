@@ -32,6 +32,7 @@ export interface ParsedConversation {
   participants: ParsedContact[]
   messages: ParsedMessage[]
   dateRange: { start: string | null; end: string | null }
+  ownerPhone: string | null
 }
 
 export type ParseResult =
@@ -249,6 +250,11 @@ function isPdfConversation(content: string): boolean {
 function parsePdfConversation(content: string): ParsedConversation {
   const normalized = normalizePdfText(content)
   const participants: ParsedContact[] = []
+  let ownerPhone: string | null = null
+
+  // Extract owner from Cuenta: field
+  const cuentaMatch = normalized.match(/Cuenta:\s*(\d+)@s\.whatsapp\.net/i)
+  if (cuentaMatch) ownerPhone = '+' + cuentaMatch[1]
 
   // Extract participants from header
   const partSection = normalized.match(/Participantes\s*\n([\s\S]*?)(?=Conversación\s*-)/i)
@@ -256,8 +262,10 @@ function parsePdfConversation(content: string): ParsedConversation {
     const jids = partSection[1].match(/\d+@s\.whatsapp\.net\s*[^\n]*/g)
     if (jids) {
       for (const j of jids) {
+        const isOwner = /\(owner\)|propietario|\*/i.test(j)
         const c = parseContact(j.trim())
-        if (!/propietario|owner/i.test(j)) participants.push(c)
+        if (isOwner && !ownerPhone) ownerPhone = c.phone
+        participants.push(c)
       }
     }
   }
@@ -337,11 +345,16 @@ function parsePdfConversation(content: string): ParsedConversation {
     })
   }
 
-  return { participants, messages, dateRange }
+  return { participants, messages, dateRange, ownerPhone }
 }
 
 function parseTxtConversation(content: string): ParsedConversation {
   const participants: ParsedContact[] = []
+  let ownerPhone: string | null = null
+
+  // Extract owner from Cuenta: field
+  const cuentaMatch = content.match(/Cuenta:\s*(\d+)@s\.whatsapp\.net/i)
+  if (cuentaMatch) ownerPhone = '+' + cuentaMatch[1]
 
   const participantsMatch = content.match(/Participantes?:\s*(.+?)(?:\n|$)/i)
   if (participantsMatch) {
@@ -349,7 +362,10 @@ function parseTxtConversation(content: string): ParsedConversation {
     const entries = raw.match(/\d+@s\.whatsapp\.net\s*[^,@]*/g)
     if (entries) {
       for (const entry of entries) {
-        participants.push(parseContact(entry.trim()))
+        const isOwner = /\(owner\)|propietario|\*/i.test(entry)
+        const c = parseContact(entry.trim())
+        if (isOwner && !ownerPhone) ownerPhone = c.phone
+        participants.push(c)
       }
     } else {
       for (const part of raw.split(',')) {
@@ -400,7 +416,7 @@ function parseTxtConversation(content: string): ParsedConversation {
     })
   }
 
-  return { participants, messages, dateRange }
+  return { participants, messages, dateRange, ownerPhone }
 }
 
 function parseConversacion(content: string): ParsedConversation {

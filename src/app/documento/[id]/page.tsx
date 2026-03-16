@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { DocumentViewer } from '@/components/DocumentViewer'
 import { MetadataCard } from '@/components/MetadataCard'
 import { RelatedDocuments } from '@/components/RelatedDocuments'
+import { EntitySummary } from '@/components/EntitySummary'
 import { createClient } from '@/lib/supabase'
 
 // Structured chat context extracted from forensic chat exports
@@ -208,6 +209,16 @@ export default async function DocumentoPage({ params }: Props) {
     chatContext = await resolveAttachmentContext(supabase, doc.file_path)
   }
 
+  // Fetch entities linked to this document
+  const { data: docEntities } = await supabase
+    .from('document_entities')
+    .select('entity_id, entities(id, entity_type, value, display_name)')
+    .eq('document_id', params.id)
+
+  const entities = (docEntities || [])
+    .map((de: Record<string, unknown>) => de.entities as { id: string; entity_type: string; value: string; display_name: string | null } | null)
+    .filter((e): e is { id: string; entity_type: string; value: string; display_name: string | null } => e != null)
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Breadcrumb */}
@@ -238,6 +249,8 @@ export default async function DocumentoPage({ params }: Props) {
         <MetadataCard doc={doc} chatContext={chatContext} />
       </div>
 
+      {entities.length > 0 && <EntitySummary entities={entities} />}
+
       <DocumentViewer
         filePath={doc.file_path}
         content={doc.content}
@@ -245,6 +258,7 @@ export default async function DocumentoPage({ params }: Props) {
         title={doc.title}
         durationSeconds={doc.duration_seconds}
         fileExists={fileExists}
+        entities={entities}
       />
 
       <RelatedDocuments documentId={params.id} />

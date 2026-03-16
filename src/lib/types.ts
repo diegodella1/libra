@@ -35,3 +35,19 @@ export interface ChatResponse {
   reply: string
   sources: { id: string; title: string; date: string }[]
 }
+
+export interface Entity {
+  id: string
+  entity_type: 'phone' | 'email' | 'organization' | 'crypto_wallet' | 'url'
+  value: string
+  display_name: string | null
+  doc_count: number
+}
+
+export interface DocumentEntity {
+  id: string
+  title: string | null
+  doc_type: string
+  date: string | null
+  context: string | null
+}

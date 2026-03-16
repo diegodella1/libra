@@ -7,11 +7,20 @@ import {
   type ParseResult,
   type ParsedCall,
   type ParsedMessage,
+  type ParsedConversation,
 } from '@/lib/forensic-parser'
+import { EntityHighlighter } from '@/components/EntityHighlighter'
+
+interface EntityMatch {
+  id: string
+  entity_type: string
+  value: string
+}
 
 interface ForensicContentProps {
   content: string
   docType: string
+  entities?: EntityMatch[]
 }
 
 // --- Icons ---
@@ -153,43 +162,71 @@ function LlamadasView({ calls }: { calls: ParsedCall[] }) {
   )
 }
 
-// --- Conversacion view ---
+// --- Conversacion view (chat bubbles) ---
+
+const SENDER_COLORS = [
+  { bg: 'bg-blue-50', border: 'border-blue-200', name: 'text-blue-700' },
+  { bg: 'bg-purple-50', border: 'border-purple-200', name: 'text-purple-700' },
+  { bg: 'bg-teal-50', border: 'border-teal-200', name: 'text-teal-700' },
+  { bg: 'bg-rose-50', border: 'border-rose-200', name: 'text-rose-700' },
+  { bg: 'bg-orange-50', border: 'border-orange-200', name: 'text-orange-700' },
+  { bg: 'bg-cyan-50', border: 'border-cyan-200', name: 'text-cyan-700' },
+]
+
+function extractDate(ts: string | null): string | null {
+  if (!ts) return null
+  const m = ts.match(/(\d{1,2}\/\d{1,2}\/\d{4})/)
+  return m ? m[1] : null
+}
 
 function ConversacionView({ conversation }: { conversation: ParseResult & { format: 'conversacion' } }) {
-  const { participants, messages, dateRange } = conversation.conversation
+  const { participants, messages, dateRange, ownerPhone } = conversation.conversation
 
-  // Determine unique senders for context
-  const senderNames = new Map<string, string>()
-  for (const msg of messages) {
-    const key = msg.from.phone
-    if (!senderNames.has(key)) {
-      senderNames.set(key, contactLabel(msg.from))
+  // Build sender color map
+  const senderColorMap = useMemo(() => {
+    const map = new Map<string, typeof SENDER_COLORS[0]>()
+    let colorIdx = 0
+    for (const msg of messages) {
+      const key = msg.from.phone
+      if (!map.has(key) && key !== ownerPhone) {
+        map.set(key, SENDER_COLORS[colorIdx % SENDER_COLORS.length])
+        colorIdx++
+      }
     }
-  }
-  const uniqueSenders = Array.from(senderNames.values())
+    return map
+  }, [messages, ownerPhone])
+
+  // Determine unique senders for header
+  const senderNames = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const msg of messages) {
+      if (!m.has(msg.from.phone)) m.set(msg.from.phone, contactLabel(msg.from))
+    }
+    return Array.from(m.values())
+  }, [messages])
+
+  let lastDate: string | null = null
 
   return (
     <div>
-      {/* Header with context */}
+      {/* Header */}
       <div className="mb-4 pb-3 border-b border-ink-100">
-        {/* Who is talking to whom */}
-        {uniqueSenders.length >= 2 && (
+        {senderNames.length >= 2 && (
           <p className="text-xs text-ink-600 mb-2">
-            <span className="font-semibold">{uniqueSenders[0]}</span>
+            <span className="font-semibold">{senderNames[0]}</span>
             {' con '}
-            <span className="font-semibold">{uniqueSenders.slice(1).join(', ')}</span>
+            <span className="font-semibold">{senderNames.slice(1).join(', ')}</span>
           </p>
         )}
-        {uniqueSenders.length === 1 && participants.length > 0 && (
+        {senderNames.length === 1 && participants.length > 0 && (
           <p className="text-xs text-ink-600 mb-2">
-            <span className="font-semibold">{uniqueSenders[0]}</span>
+            <span className="font-semibold">{senderNames[0]}</span>
             {' con '}
             <span className="font-semibold">
-              {participants.filter(p => contactLabel(p) !== uniqueSenders[0]).map(p => contactLabel(p)).join(', ') || 'desconocido'}
+              {participants.filter(p => contactLabel(p) !== senderNames[0]).map(p => contactLabel(p)).join(', ') || 'desconocido'}
             </span>
           </p>
         )}
-
         {participants.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2">
             {participants.map((p, i) => (
@@ -207,35 +244,75 @@ function ConversacionView({ conversation }: { conversation: ParseResult & { form
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="space-y-2.5">
+      {/* Chat bubbles */}
+      <div className="space-y-1">
         {messages.map((msg, i) => {
+          const msgDate = extractDate(msg.timestamp)
+          let showDateSep = false
+          if (msgDate && msgDate !== lastDate) {
+            showDateSep = true
+            lastDate = msgDate
+          }
+
+          // System / call events
           if (msg.type === 'call') {
             return (
-              <div key={i} className="flex items-center gap-2 py-1.5 px-3 rounded-lg bg-ink-50 text-xs text-ink-500">
-                <MessageTypeIcon type="call" />
-                <span className="font-medium">{contactLabel(msg.from)}</span>
-                <span className="italic">{msg.content}</span>
-                {msg.timestamp && <span className="ml-auto text-ink-400">{shortTimestamp(msg.timestamp)}</span>}
+              <div key={i}>
+                {showDateSep && (
+                  <div className="flex items-center gap-3 my-3">
+                    <div className="flex-1 h-px bg-ink-100" />
+                    <span className="text-[10px] font-mono text-ink-400">{msgDate}</span>
+                    <div className="flex-1 h-px bg-ink-100" />
+                  </div>
+                )}
+                <div className="flex justify-center my-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-ink-100 text-[11px] text-ink-500">
+                    <MessageTypeIcon type="call" />
+                    <span>{contactLabel(msg.from)}</span>
+                    <span className="italic">{msg.content}</span>
+                    {msg.timestamp && <span className="text-ink-400 ml-1">{shortTimestamp(msg.timestamp)}</span>}
+                  </div>
+                </div>
               </div>
             )
           }
 
+          const isOwner = ownerPhone != null && msg.from.phone === ownerPhone
+          const senderColor = senderColorMap.get(msg.from.phone)
+
           return (
             <div key={i}>
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-xs font-semibold text-ink-700">
-                  {contactLabel(msg.from)}
-                </span>
-                {msg.timestamp && (
-                  <span className="text-[10px] text-ink-400 whitespace-nowrap shrink-0 font-mono">
-                    {shortTimestamp(msg.timestamp)}
-                  </span>
-                )}
+              {showDateSep && (
+                <div className="flex items-center gap-3 my-3">
+                  <div className="flex-1 h-px bg-ink-100" />
+                  <span className="text-[10px] font-mono text-ink-400">{msgDate}</span>
+                  <div className="flex-1 h-px bg-ink-100" />
+                </div>
+              )}
+              <div className={`flex ${isOwner ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-[80%] px-3 py-2 border ${
+                    isOwner
+                      ? 'bg-gold-50 border-gold-200 rounded-xl rounded-tr-sm'
+                      : `${senderColor?.bg || 'bg-ink-50'} ${senderColor?.border || 'border-ink-100'} rounded-xl rounded-tl-sm`
+                  }`}
+                >
+                  {/* Sender name (only for non-owner) */}
+                  {!isOwner && (
+                    <p className={`text-[11px] font-semibold mb-0.5 ${senderColor?.name || 'text-ink-700'}`}>
+                      {contactLabel(msg.from)}
+                    </p>
+                  )}
+                  <p className="text-sm text-ink-700 whitespace-pre-wrap break-words leading-relaxed">
+                    {msg.content}
+                  </p>
+                  {msg.timestamp && (
+                    <p className={`text-[10px] mt-1 font-mono ${isOwner ? 'text-gold-600 text-right' : 'text-ink-400'}`}>
+                      {shortTimestamp(msg.timestamp)}
+                    </p>
+                  )}
+                </div>
               </div>
-              <p className="text-sm text-ink-600 whitespace-pre-wrap leading-relaxed mt-0.5">
-                {msg.content}
-              </p>
             </div>
           )
         })}
@@ -246,7 +323,7 @@ function ConversacionView({ conversation }: { conversation: ParseResult & { form
 
 // --- Cleaned content for unknown/fallback formats ---
 
-function CleanedContent({ content }: { content: string }) {
+function CleanedContent({ content, entities }: { content: string; entities?: EntityMatch[] }) {
   // Strip common forensic metadata noise
   const cleaned = content
     .replace(/Informe de la extracción[^\n]*/gi, '')
@@ -265,24 +342,32 @@ function CleanedContent({ content }: { content: string }) {
     return <p className="text-ink-300 italic text-sm">Contenido no disponible en formato legible.</p>
   }
 
+  if (entities && entities.length > 0) {
+    return (
+      <div className="whitespace-pre-wrap">
+        <EntityHighlighter text={cleaned} entities={entities} />
+      </div>
+    )
+  }
+
   return <div className="whitespace-pre-wrap">{cleaned}</div>
 }
 
 // --- Main component ---
 
-export function ForensicContent({ content, docType }: ForensicContentProps) {
+export function ForensicContent({ content, docType, entities }: ForensicContentProps) {
   const parsed = useMemo(() => parseForensicContent(content, docType), [content, docType])
 
   if (parsed.format === 'llamadas') {
     if (parsed.calls.length === 0) {
-      return <CleanedContent content={content} />
+      return <CleanedContent content={content} entities={entities} />
     }
     return <LlamadasView calls={parsed.calls} />
   }
 
   if (parsed.format === 'conversacion') {
     if (parsed.conversation.messages.length === 0) {
-      return <CleanedContent content={content} />
+      return <CleanedContent content={content} entities={entities} />
     }
     return <ConversacionView conversation={parsed} />
   }
@@ -290,7 +375,7 @@ export function ForensicContent({ content, docType }: ForensicContentProps) {
   // Unknown format: clean and show
   return (
     <div className="prose prose-sm max-w-none text-ink-700 leading-relaxed">
-      <CleanedContent content={content} />
+      <CleanedContent content={content} entities={entities} />
     </div>
   )
 }

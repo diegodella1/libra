@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { authFetch } from '@/lib/api'
 import { StatCard } from '@/components/charts/StatCard'
 import { HBarChart } from '@/components/charts/HBarChart'
-import { DateChart } from '@/components/charts/DateChart'
+import { InteractiveTimeline } from '@/components/InteractiveTimeline'
 import { ScrollReveal } from '@/components/ScrollReveal'
 
 // Type colors matching DocumentRow TYPE_CONFIG
@@ -117,8 +117,12 @@ export default function DatosPage() {
       </div>
 
       {/* Charts */}
+      {/* Interactive timeline - full width */}
+      <div className="mb-6">
+        <InteractiveTimeline />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <DateChart data={stats.by_date || []} title="Documentos por fecha" />
         <HBarChart data={typeData} title="Documentos por tipo" />
       </div>
 
