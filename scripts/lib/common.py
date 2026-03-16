@@ -23,6 +23,19 @@ KNOWN_PERSONS = {
     'Charles Hoskinson': ['Hoskinson'],
 }
 
+KNOWN_ORGS = {
+    'Kelsier Ventures': ['Kelsier', 'Kelsier Ventures'],
+    'KIP Protocol': ['KIP Protocol', 'KIP'],
+    'DATIP': ['DATIP'],
+    'CNV': ['CNV', 'Comisión Nacional de Valores', 'Comision Nacional de Valores'],
+    'Meteora': ['Meteora'],
+    'Jupiter': ['Jupiter'],
+    'Raydium': ['Raydium'],
+    'Binance': ['Binance'],
+    'UIF': ['UIF', 'Unidad de Información Financiera'],
+    'SEC': ['SEC', 'Securities and Exchange Commission'],
+}
+
 EXCLUDE_PATTERNS = [
     '/icons/', '/__MACOSX/', '/._', '.DS_Store',
     '/party_photos/', '/resources/', '.thumb', '/instant_messages/',

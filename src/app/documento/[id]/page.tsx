@@ -126,6 +126,14 @@ export default async function DocumentoPage({ params }: Props) {
           </div>
         )}
 
+        {/* Original file path for journalists to locate in ZIP */}
+        <div className="flex items-center gap-2 text-xs text-ink-400 bg-ink-50/50 border border-ink-100 rounded-lg px-3 py-2 mb-4 font-mono group">
+          <svg className="w-3.5 h-3.5 text-ink-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+          </svg>
+          <span className="truncate select-all" title={doc.file_path}>{doc.file_path}</span>
+        </div>
+
         <div className="flex items-start gap-3 mb-3">
           <span className="text-xs font-medium px-2 py-1 rounded-full bg-ink-100 text-ink-600 shrink-0 mt-1">
             {TYPE_LABELS[doc.doc_type] || doc.doc_type}

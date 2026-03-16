@@ -1,54 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
+import { validateRequest } from '@/lib/auth'
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const authError = validateRequest(request)
+  if (authError) return authError
+
   const supabase = createClient()
 
-  const { data: doc, error } = await supabase
-    .from('documents')
-    .select('id, date, doc_type, participants, tags')
-    .eq('id', params.id)
-    .single()
+  const { data, error } = await supabase.rpc('get_related_documents', {
+    doc_uuid: params.id,
+    max_results: 10,
+  })
 
-  if (error || !doc) {
+  if (error) {
+    // Fallback: if RPC not available yet, return empty
+    console.error('get_related_documents error:', error.message)
     return NextResponse.json({ documents: [] })
   }
 
-  // Find related docs by same date or same doc_type, excluding current
-  let query = supabase
-    .from('documents')
-    .select('id, title, doc_type, date, participants, tags, file_path, file_size')
-    .neq('id', params.id)
-    .limit(5)
-
-  if (doc.date) {
-    // Same date first, then same type
-    query = query.eq('date', doc.date).order('date', { ascending: false })
-  } else if (doc.doc_type) {
-    query = query.eq('doc_type', doc.doc_type).order('date', { ascending: false, nullsFirst: false })
-  }
-
-  const { data: related } = await query
-
-  // If we got fewer than 5 from date match, try to fill with same type
-  let documents = related || []
-  if (doc.date && documents.length < 5) {
-    const existingIds = [params.id, ...documents.map((d) => d.id)]
-    const { data: typeRelated } = await supabase
-      .from('documents')
-      .select('id, title, doc_type, date, participants, tags, file_path, file_size')
-      .eq('doc_type', doc.doc_type)
-      .not('id', 'in', `(${existingIds.join(',')})`)
-      .order('date', { ascending: false, nullsFirst: false })
-      .limit(5 - documents.length)
-
-    if (typeRelated) {
-      documents = [...documents, ...typeRelated]
-    }
-  }
+  // Map RPC columns to frontend shape
+  const documents = (data || []).map((row: Record<string, unknown>) => ({
+    id: row.id,
+    title: row.title,
+    doc_type: row.doc_type,
+    date: row.date,
+    file_path: row.file_path,
+    file_size: row.file_size,
+    link_type: row.link_type,
+    strength: row.strength,
+    link_metadata: row.link_metadata,
+  }))
 
   return NextResponse.json({ documents })
 }
