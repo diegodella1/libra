@@ -1,5 +1,11 @@
 import Link from 'next/link'
 
+interface ChatContext {
+  jid: string
+  contactName: string | null
+  chatDocId: string | null
+}
+
 interface MetadataCardProps {
   doc: {
     doc_type: string
@@ -13,6 +19,7 @@ interface MetadataCardProps {
     audio_format: string | null
     content: string | null
   }
+  chatContext?: ChatContext | null
 }
 
 // --- Helpers ---
@@ -107,6 +114,13 @@ function formatDuration(seconds: number): string {
 
 function cleanParticipant(p: string): string {
   return p.replace(/@s\.whatsapp\.net/g, '').trim()
+}
+
+function formatJidPhone(jid: string): string {
+  const digits = jid.replace(/[^\d]/g, '')
+  const arMatch = digits.match(/^54(9)(\d{2})(\d{4})(\d{4})$/)
+  if (arMatch) return `+54 9 ${arMatch[2]} ${arMatch[3]}-${arMatch[4]}`
+  return `+${digits}`
 }
 
 function extractParticipantNumbers(participants: string[]): { name: string; phone: string | null }[] {
@@ -237,7 +251,7 @@ function ClockIcon() {
 
 // --- Main component ---
 
-export function MetadataCard({ doc }: MetadataCardProps) {
+export function MetadataCard({ doc, chatContext }: MetadataCardProps) {
   const deviceInfo = getDeviceInfo(doc.file_path)
   const platform = getPlatform(doc.file_path, doc.tags)
   const { efecto, punto } = getEfectoPunto(doc.tags)
@@ -312,6 +326,32 @@ export function MetadataCard({ doc }: MetadataCardProps) {
             label="Cuenta"
             icon={<DeviceIcon />}
             value={<span className="font-mono text-xs">{convMeta.ownerAccount}</span>}
+          />
+        )}
+
+        {/* Chat context: who the audio/image was sent to */}
+        {chatContext && (
+          <MetaRow
+            label="Destinatario"
+            icon={<PersonIcon />}
+            value={
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-medium text-ink-700">
+                  {chatContext.contactName || 'Contacto'}
+                </span>
+                <span className="text-[11px] font-mono text-ink-400 bg-ink-50 rounded px-1.5 py-0.5">
+                  {formatJidPhone(chatContext.jid)}
+                </span>
+                {chatContext.chatDocId && (
+                  <Link
+                    href={`/documento/${chatContext.chatDocId}`}
+                    className="text-[11px] text-gold-700 hover:text-gold-900 transition-colors"
+                  >
+                    Ver conversacion
+                  </Link>
+                )}
+              </div>
+            }
           />
         )}
 

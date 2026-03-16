@@ -52,6 +52,71 @@ export default async function DocumentoPage({ params }: Props) {
     fileExists = false
   }
 
+  // For audio/image files in /files/ folders, try to find the chat context by UUID cross-reference
+  let chatContext: { jid: string; contactName: string | null; chatDocId: string | null } | null = null
+  if (['audio', 'imagen'].includes(doc.doc_type)) {
+    // Try to extract JID directly from path (files already in /chats/WhatsApp_XXX/)
+    const jidInPath = doc.file_path.match(/chats\/WhatsApp_(\d+)@s\.whatsapp\.net/)
+    if (jidInPath) {
+      // Get contact name from sibling chat.txt
+      const chatBasePath = doc.file_path.replace(/\/attachments\d+\/.*$/, '')
+      const { data: chatDoc } = await supabase
+        .from('documents')
+        .select('id, content')
+        .like('file_path', `${chatBasePath}/chat%`)
+        .limit(1)
+        .single()
+      let contactName: string | null = null
+      if (chatDoc?.content) {
+        // Extract participant name from chat header: "Participantes: ...JID Name, ..."
+        const participantMatch = chatDoc.content.match(
+          new RegExp(`${jidInPath[1]}@s\\.whatsapp\\.net\\s+([^,\\n]+)`)
+        )
+        if (participantMatch) {
+          contactName = participantMatch[1]
+            .replace(/\(owner\)/gi, '').replace(/\*/g, '').trim() || null
+        }
+      }
+      chatContext = { jid: jidInPath[1], contactName, chatDocId: chatDoc?.id || null }
+    } else {
+      // Loose file in /files/Audio/ — cross-reference UUID with chat attachments
+      const fileUuid = doc.file_path.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i)
+      if (fileUuid) {
+        const { data: chatAttachment } = await supabase
+          .from('documents')
+          .select('file_path')
+          .like('file_path', `%/chats/%${fileUuid[1]}%`)
+          .neq('file_path', doc.file_path)
+          .limit(1)
+          .single()
+        if (chatAttachment) {
+          const jidMatch = chatAttachment.file_path.match(/chats\/WhatsApp_(\d+)@s\.whatsapp\.net/)
+          if (jidMatch) {
+            // Get contact name from the chat txt
+            const chatBase = chatAttachment.file_path.replace(/\/attachments\d+\/.*$/, '')
+            const { data: chatDoc } = await supabase
+              .from('documents')
+              .select('id, content')
+              .like('file_path', `${chatBase}/chat%`)
+              .limit(1)
+              .single()
+            let contactName: string | null = null
+            if (chatDoc?.content) {
+              const participantMatch = chatDoc.content.match(
+                new RegExp(`${jidMatch[1]}@s\\.whatsapp\\.net\\s+([^,\\n]+)`)
+              )
+              if (participantMatch) {
+                contactName = participantMatch[1]
+                  .replace(/\(owner\)/gi, '').replace(/\*/g, '').trim() || null
+              }
+            }
+            chatContext = { jid: jidMatch[1], contactName, chatDocId: chatDoc?.id || null }
+          }
+        }
+      }
+    }
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Breadcrumb */}
@@ -79,7 +144,7 @@ export default async function DocumentoPage({ params }: Props) {
 
       {/* Metadata card */}
       <div className="mb-8">
-        <MetadataCard doc={doc} />
+        <MetadataCard doc={doc} chatContext={chatContext} />
       </div>
 
       <DocumentViewer
