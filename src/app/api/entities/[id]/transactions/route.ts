@@ -53,12 +53,20 @@ async function fetchSolanaTransactions(
     throw new Error(`Solana RPC error: ${resp.status}`)
   }
 
-  const data = await resp.json()
-  if (data.error) {
-    throw new Error(data.error.message || 'Solana RPC error')
+  const text = await resp.text()
+  let data: Record<string, unknown>
+  try {
+    data = JSON.parse(text)
+  } catch {
+    throw new Error('Respuesta inesperada de Solana RPC')
   }
 
-  const sigs: { signature: string; blockTime: number | null; err: unknown; memo: string | null }[] = data.result || []
+  if (data.error) {
+    const err = data.error as { message?: string }
+    throw new Error(err.message || 'Direccion Solana invalida o no encontrada')
+  }
+
+  const sigs = (data.result || []) as { signature: string; blockTime: number | null; err: unknown; memo: string | null }[]
 
   // Filter by date range
   const fromTs = fromDate ? new Date(fromDate + 'T00:00:00Z').getTime() / 1000 : null
@@ -90,12 +98,18 @@ async function fetchBitcoinTransactions(
   limit: number,
 ): Promise<{ transactions: NormalizedTx[]; total: number; chain: 'bitcoin' }> {
   const resp = await fetch(`https://blockstream.info/api/address/${address}/txs`)
+  const text = await resp.text()
 
   if (!resp.ok) {
-    throw new Error(`Blockstream API error: ${resp.status}`)
+    throw new Error(`Direccion Bitcoin invalida o no encontrada: ${text.slice(0, 100)}`)
   }
 
-  const txs: { txid: string; status: { confirmed: boolean; block_time?: number } }[] = await resp.json()
+  let txs: { txid: string; status: { confirmed: boolean; block_time?: number } }[]
+  try {
+    txs = JSON.parse(text)
+  } catch {
+    throw new Error(`Respuesta inesperada de Blockstream: ${text.slice(0, 100)}`)
+  }
 
   const fromTs = fromDate ? new Date(fromDate + 'T00:00:00Z').getTime() / 1000 : null
   const toTs = toDate ? new Date(toDate + 'T23:59:59Z').getTime() / 1000 : null
