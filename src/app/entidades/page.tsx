@@ -110,7 +110,7 @@ function EntityDetail({ entityId }: { entityId: string }) {
 
       {/* Wallet transaction explorer */}
       {entity.entity_type === 'crypto_wallet' && (
-        <WalletTransactions entityId={entity.id} />
+        <WalletTransactions entityId={entity.id} address={entity.value} />
       )}
     </div>
   )

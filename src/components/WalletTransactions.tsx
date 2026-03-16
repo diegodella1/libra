@@ -32,7 +32,12 @@ function shortenHash(hash: string): string {
   return hash.slice(0, 8) + '...' + hash.slice(-8)
 }
 
-export function WalletTransactions({ entityId }: { entityId: string }) {
+export function WalletTransactions({ entityId, address }: { entityId: string; address: string }) {
+  // Quick client-side chain detection to show/hide UI
+  const isBtc = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address) || /^bc1[a-z0-9]{25,90}$/.test(address)
+  const isSolana = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address) && /[A-Z]/.test(address) && !isBtc
+  const isSupported = isBtc || isSolana
+  const chainLabel = isBtc ? 'Bitcoin' : isSolana ? 'Solana' : null
   const [fromDate, setFromDate] = useState('2025-02-01')
   const [toDate, setToDate] = useState('2025-03-01')
   const [result, setResult] = useState<TxResult | null>(null)
@@ -49,13 +54,30 @@ export function WalletTransactions({ entityId }: { entityId: string }) {
 
     authFetch(`/api/entities/${entityId}/transactions?${params}`)
       .then(async r => {
-        const data = await r.json()
+        const text = await r.text()
+        let data: TxResult
+        try {
+          data = JSON.parse(text)
+        } catch {
+          throw new Error('Respuesta inesperada del servidor')
+        }
         if (!r.ok) throw new Error(data.error || 'Error consultando blockchain')
         setResult(data)
       })
-      .catch(err => setError(err.message))
+      .catch(err => setError(err instanceof Error ? err.message : 'Error desconocido'))
       .finally(() => setLoading(false))
   }, [entityId, fromDate, toDate])
+
+  if (!isSupported) {
+    return (
+      <div className="mt-6 border-t border-ink-100 pt-4">
+        <p className="text-xs text-ink-400 italic">
+          Esta direccion no corresponde a una wallet valida de Solana o Bitcoin.
+          Puede ser un hash parcial extraido del expediente.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="mt-6 border-t border-ink-100 pt-4">
@@ -64,6 +86,7 @@ export function WalletTransactions({ entityId }: { entityId: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
         Transacciones en blockchain
+        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-ink-100 text-ink-500">{chainLabel}</span>
       </h3>
 
       {/* Date range + fetch */}

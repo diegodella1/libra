@@ -4,14 +4,19 @@ import { validateRequest } from '@/lib/auth'
 
 // Detect blockchain from address format
 function detectChain(address: string): 'solana' | 'bitcoin' | 'unknown' {
-  // Solana: base58, 32-44 chars, starts with uppercase or number
-  if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address) && address.length >= 32) {
-    // Bitcoin addresses start with 1, 3, or bc1
-    if (/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address)) return 'bitcoin'
-    if (/^bc1[a-z0-9]{25,90}$/.test(address)) return 'bitcoin'
+  // Bitcoin: starts with 1, 3, or bc1
+  if (/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address)) return 'bitcoin'
+  if (/^bc1[a-z0-9]{25,90}$/.test(address)) return 'bitcoin'
+
+  // Solana: base58 (NO lowercase hex), 32-44 chars, must contain uppercase letters
+  // This filters out hex hashes that aren't real Solana addresses
+  if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address) && /[A-Z]/.test(address)) {
     return 'solana'
   }
-  if (/^0x[0-9a-fA-F]{40}$/.test(address)) return 'unknown' // ETH not supported yet
+
+  // Hex-only strings are likely truncated hashes, not valid addresses
+  if (/^[0-9a-f]+$/i.test(address)) return 'unknown'
+
   return 'unknown'
 }
 
@@ -157,7 +162,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     return NextResponse.json({
-      error: 'Blockchain no soportada para esta direccion',
+      error: 'Esta direccion no es una wallet valida de Solana o Bitcoin. Puede ser un hash truncado del expediente.',
       address: entity.value,
       chain: 'unknown',
     }, { status: 400 })
