@@ -1,10 +1,5 @@
 import Link from 'next/link'
-
-interface ChatContext {
-  jid: string
-  contactName: string | null
-  chatDocId: string | null
-}
+import type { ChatContext } from '@/app/documento/[id]/page'
 
 interface MetadataCardProps {
   doc: {
@@ -329,28 +324,95 @@ export function MetadataCard({ doc, chatContext }: MetadataCardProps) {
           />
         )}
 
-        {/* Chat context: who the audio/image was sent to */}
-        {chatContext && (
+        {/* Forensic chat context for audio/image attachments */}
+        {chatContext?.sender && (
           <MetaRow
-            label="Destinatario"
+            label="Enviado por"
             icon={<PersonIcon />}
             value={
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-medium text-ink-700">
-                  {chatContext.contactName || 'Contacto'}
-                </span>
+                <Link
+                  href={`/explorador?q=${encodeURIComponent(chatContext.sender.name || chatContext.sender.jid)}`}
+                  className="font-medium text-ink-700 hover:text-gold-700 transition-colors"
+                >
+                  {chatContext.sender.name || 'Contacto'}
+                </Link>
                 <span className="text-[11px] font-mono text-ink-400 bg-ink-50 rounded px-1.5 py-0.5">
-                  {formatJidPhone(chatContext.jid)}
+                  {formatJidPhone(chatContext.sender.jid)}
                 </span>
+              </div>
+            }
+          />
+        )}
+
+        {chatContext && chatContext.participants.length > 0 && (
+          <MetaRow
+            label="Conversacion"
+            icon={<PersonIcon />}
+            value={
+              <div className="flex flex-col gap-1.5">
+                {chatContext.participants.map((p, i) => (
+                  <div key={i} className="flex items-center gap-2 flex-wrap">
+                    <Link
+                      href={`/explorador?q=${encodeURIComponent(p.name || p.jid)}`}
+                      className="text-sm text-ink-700 hover:text-gold-700 transition-colors"
+                    >
+                      {p.name || 'Contacto'}
+                    </Link>
+                    <span className="text-[11px] font-mono text-ink-400 bg-ink-50 rounded px-1.5 py-0.5">
+                      {formatJidPhone(p.jid)}
+                    </span>
+                    {p.isOwner && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                        dueño
+                      </span>
+                    )}
+                  </div>
+                ))}
                 {chatContext.chatDocId && (
                   <Link
                     href={`/documento/${chatContext.chatDocId}`}
-                    className="text-[11px] text-gold-700 hover:text-gold-900 transition-colors"
+                    className="text-[11px] text-gold-700 hover:text-gold-900 transition-colors inline-flex items-center gap-1 mt-0.5"
                   >
-                    Ver conversacion
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                    Ver conversacion completa
                   </Link>
                 )}
               </div>
+            }
+          />
+        )}
+
+        {chatContext?.timestamp && (
+          <MetaRow
+            label="Enviado"
+            icon={<CalendarIcon />}
+            value={<span className="font-mono text-xs">{chatContext.timestamp}</span>}
+          />
+        )}
+
+        {chatContext?.app && !platform && (
+          <MetaRow
+            label="Plataforma"
+            value={
+              <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 font-medium">
+                {chatContext.app}
+              </span>
+            }
+          />
+        )}
+
+        {chatContext?.chatStart && (
+          <MetaRow
+            label="Periodo chat"
+            icon={<CalendarIcon />}
+            value={
+              <span className="text-xs font-mono">
+                {chatContext.chatStart}
+                {chatContext.chatEnd && ` — ${chatContext.chatEnd}`}
+              </span>
             }
           />
         )}

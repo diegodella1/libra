@@ -5,6 +5,156 @@ import { MetadataCard } from '@/components/MetadataCard'
 import { RelatedDocuments } from '@/components/RelatedDocuments'
 import { createClient } from '@/lib/supabase'
 
+// Structured chat context extracted from forensic chat exports
+export interface ChatContext {
+  // Who sent this specific message
+  sender: { jid: string; name: string | null } | null
+  // All participants in the conversation
+  participants: { jid: string; name: string | null; isOwner: boolean }[]
+  // When this specific attachment was sent
+  timestamp: string | null
+  // App used
+  app: string | null
+  // Chat date range
+  chatStart: string | null
+  chatEnd: string | null
+  // Link to the full conversation document
+  chatDocId: string | null
+}
+
+function parseParticipantsFromHeader(content: string): ChatContext['participants'] {
+  const participants: ChatContext['participants'] = []
+  const headerMatch = content.match(/Participantes?:\s*(.+?)(?:\n|$)/i)
+  if (!headerMatch) return participants
+
+  const raw = headerMatch[1]
+  const entries = raw.match(/(\d+)@s\.whatsapp\.net\s*([^,\n]*)/g)
+  if (!entries) return participants
+
+  for (const entry of entries) {
+    const m = entry.match(/(\d+)@s\.whatsapp\.net\s*(.*)/)
+    if (!m) continue
+    const jid = m[1]
+    let name = m[2].replace(/\(owner\)/gi, '').replace(/\*/g, '').trim() || null
+    const isOwner = /\(owner\)/i.test(m[2]) || /\*/i.test(entry)
+    participants.push({ jid, name, isOwner })
+  }
+  return participants
+}
+
+function findAttachmentBlock(content: string, fileUuid: string): {
+  sender: { jid: string; name: string | null } | null
+  timestamp: string | null
+  app: string | null
+} {
+  // Split into message blocks and find the one with our attachment
+  const blocks = content.split(/-----------------------------/)
+  for (const block of blocks) {
+    if (!block.includes(fileUuid)) continue
+
+    let sender: { jid: string; name: string | null } | null = null
+    const fromMatch = block.match(/From:\s*(\d+)@s\.whatsapp\.net\s*(.*)$/im)
+    if (fromMatch) {
+      sender = {
+        jid: fromMatch[1],
+        name: fromMatch[2].replace(/\(owner\)/gi, '').replace(/\*/g, '').trim() || null,
+      }
+    }
+
+    let timestamp: string | null = null
+    const tsMatch = block.match(/Marca de hora:\s*(.+?)(?:\n|$)/i)
+    if (tsMatch) {
+      timestamp = tsMatch[1].replace(/\(UTC[^)]*\)/i, '').trim()
+    }
+
+    let app: string | null = null
+    const appMatch = block.match(/Aplicación de origen:\s*(.+?)(?:\n|$)/i)
+    if (appMatch) app = appMatch[1].trim()
+
+    return { sender, timestamp, app }
+  }
+  return { sender: null, timestamp: null, app: null }
+}
+
+async function resolveAttachmentContext(
+  supabase: ReturnType<typeof createClient>,
+  filePath: string,
+): Promise<ChatContext | null> {
+  // Extract file UUID from path
+  const fileUuid = filePath.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i)
+  if (!fileUuid) return null
+
+  // Step 1: Find the chat folder path (either from file path directly or by cross-referencing)
+  let chatBasePath: string | null = null
+  const directJid = filePath.match(/chats\/WhatsApp_(\d+)@s\.whatsapp\.net/)
+  if (directJid) {
+    chatBasePath = filePath.replace(/\/attachments\d+\/.*$/, '')
+  } else {
+    // Cross-reference: find same UUID in a /chats/ folder
+    const { data: chatAttachment } = await supabase
+      .from('documents')
+      .select('file_path')
+      .like('file_path', `%/chats/%${fileUuid[1]}%`)
+      .neq('file_path', filePath)
+      .limit(1)
+      .single()
+    if (chatAttachment) {
+      chatBasePath = chatAttachment.file_path.replace(/\/attachments\d+\/.*$/, '')
+    }
+  }
+  if (!chatBasePath) return null
+
+  // Step 2: Find the chat txt file that references this UUID (has the message context)
+  const { data: chatDocs } = await supabase
+    .from('documents')
+    .select('id, content, file_path')
+    .like('file_path', `${chatBasePath}/chat%`)
+    .order('file_path')
+
+  if (!chatDocs || chatDocs.length === 0) return null
+
+  // Step 3: Search through chat docs for the block referencing our UUID
+  let sender: ChatContext['sender'] = null
+  let timestamp: string | null = null
+  let app: string | null = null
+  let participants: ChatContext['participants'] = []
+  let chatStart: string | null = null
+  let chatEnd: string | null = null
+  let chatDocId: string | null = chatDocs[0].id
+
+  for (const chatDoc of chatDocs) {
+    if (!chatDoc.content) continue
+
+    // Extract participants from first chat doc that has them
+    if (participants.length === 0) {
+      participants = parseParticipantsFromHeader(chatDoc.content)
+    }
+
+    // Extract date range
+    if (!chatStart) {
+      const startMatch = chatDoc.content.match(/Hora de inicio:\s*(.+?)(?:\n|$)/i)
+      if (startMatch) chatStart = startMatch[1].replace(/\(UTC[^)]*\)/i, '').trim()
+    }
+    if (!chatEnd) {
+      const endMatch = chatDoc.content.match(/Actividad más reciente:\s*(.+?)(?:\n|$)/i)
+      if (endMatch) chatEnd = endMatch[1].replace(/\(UTC[^)]*\)/i, '').trim()
+    }
+
+    // Find the specific message block that sent this attachment
+    if (chatDoc.content.includes(fileUuid[1])) {
+      const block = findAttachmentBlock(chatDoc.content, fileUuid[1])
+      sender = block.sender
+      timestamp = block.timestamp
+      app = block.app
+      chatDocId = chatDoc.id
+    }
+  }
+
+  if (participants.length === 0 && !sender) return null
+
+  return { sender, participants, timestamp, app, chatStart, chatEnd, chatDocId }
+}
+
 interface Props {
   params: { id: string }
 }
@@ -52,69 +202,10 @@ export default async function DocumentoPage({ params }: Props) {
     fileExists = false
   }
 
-  // For audio/image files in /files/ folders, try to find the chat context by UUID cross-reference
-  let chatContext: { jid: string; contactName: string | null; chatDocId: string | null } | null = null
+  // For audio/image files, find the full chat context by cross-referencing the file UUID
+  let chatContext: ChatContext | null = null
   if (['audio', 'imagen'].includes(doc.doc_type)) {
-    // Try to extract JID directly from path (files already in /chats/WhatsApp_XXX/)
-    const jidInPath = doc.file_path.match(/chats\/WhatsApp_(\d+)@s\.whatsapp\.net/)
-    if (jidInPath) {
-      // Get contact name from sibling chat.txt
-      const chatBasePath = doc.file_path.replace(/\/attachments\d+\/.*$/, '')
-      const { data: chatDoc } = await supabase
-        .from('documents')
-        .select('id, content')
-        .like('file_path', `${chatBasePath}/chat%`)
-        .limit(1)
-        .single()
-      let contactName: string | null = null
-      if (chatDoc?.content) {
-        // Extract participant name from chat header: "Participantes: ...JID Name, ..."
-        const participantMatch = chatDoc.content.match(
-          new RegExp(`${jidInPath[1]}@s\\.whatsapp\\.net\\s+([^,\\n]+)`)
-        )
-        if (participantMatch) {
-          contactName = participantMatch[1]
-            .replace(/\(owner\)/gi, '').replace(/\*/g, '').trim() || null
-        }
-      }
-      chatContext = { jid: jidInPath[1], contactName, chatDocId: chatDoc?.id || null }
-    } else {
-      // Loose file in /files/Audio/ — cross-reference UUID with chat attachments
-      const fileUuid = doc.file_path.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i)
-      if (fileUuid) {
-        const { data: chatAttachment } = await supabase
-          .from('documents')
-          .select('file_path')
-          .like('file_path', `%/chats/%${fileUuid[1]}%`)
-          .neq('file_path', doc.file_path)
-          .limit(1)
-          .single()
-        if (chatAttachment) {
-          const jidMatch = chatAttachment.file_path.match(/chats\/WhatsApp_(\d+)@s\.whatsapp\.net/)
-          if (jidMatch) {
-            // Get contact name from the chat txt
-            const chatBase = chatAttachment.file_path.replace(/\/attachments\d+\/.*$/, '')
-            const { data: chatDoc } = await supabase
-              .from('documents')
-              .select('id, content')
-              .like('file_path', `${chatBase}/chat%`)
-              .limit(1)
-              .single()
-            let contactName: string | null = null
-            if (chatDoc?.content) {
-              const participantMatch = chatDoc.content.match(
-                new RegExp(`${jidMatch[1]}@s\\.whatsapp\\.net\\s+([^,\\n]+)`)
-              )
-              if (participantMatch) {
-                contactName = participantMatch[1]
-                  .replace(/\(owner\)/gi, '').replace(/\*/g, '').trim() || null
-              }
-            }
-            chatContext = { jid: jidMatch[1], contactName, chatDocId: chatDoc?.id || null }
-          }
-        }
-      }
-    }
+    chatContext = await resolveAttachmentContext(supabase, doc.file_path)
   }
 
   return (
