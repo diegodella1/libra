@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { authFetch } from '@/lib/api'
+import { WalletTransactions } from '@/components/WalletTransactions'
 import type { Entity, DocumentEntity } from '@/lib/types'
 
 const ENTITY_TYPE_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
@@ -106,6 +107,11 @@ function EntityDetail({ entityId }: { entityId: string }) {
           </Link>
         ))}
       </div>
+
+      {/* Wallet transaction explorer */}
+      {entity.entity_type === 'crypto_wallet' && (
+        <WalletTransactions entityId={entity.id} />
+      )}
     </div>
   )
 }
