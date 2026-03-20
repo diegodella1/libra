@@ -16,6 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://libra.diegodella.ar'),
   title: 'Archivo Libra',
   description: 'Archivo periodístico de documentos judiciales públicos. Transcripciones, pruebas y documentos de la causa del token.',
   openGraph: {
@@ -23,6 +24,9 @@ export const metadata: Metadata = {
     description: 'Todos los documentos públicos de la causa por el token $LIBRA. Transcripciones, peritajes, llamadas, pruebas.',
     locale: 'es_AR',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
   },
 }
 

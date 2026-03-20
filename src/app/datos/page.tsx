@@ -62,10 +62,26 @@ export default function DatosPage() {
       <div>
         <div className="bg-ink-950 text-white py-10">
           <div className="max-w-5xl mx-auto px-4 text-center">
+            <p className="text-gold-400 text-xs font-mono tracking-widest uppercase mb-3">Radiografia</p>
             <h1 className="font-serif text-3xl sm:text-4xl font-bold">Datos del <span className="text-gold-400">caso</span></h1>
           </div>
         </div>
-        <p className="text-ink-400 font-mono text-sm mt-8 text-center">Cargando datos...</p>
+        <div className="max-w-5xl mx-auto px-4 mt-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-ink-200 p-5 space-y-2">
+                <div className="skeleton h-8 w-20" />
+                <div className="skeleton h-3 w-16" />
+                <div className="skeleton h-2.5 w-24" />
+              </div>
+            ))}
+          </div>
+          <div className="skeleton h-64 w-full rounded-xl mb-6" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="skeleton h-48 w-full rounded-xl" />
+            <div className="skeleton h-48 w-full rounded-xl" />
+          </div>
+        </div>
       </div>
     )
   }

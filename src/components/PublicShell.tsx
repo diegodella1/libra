@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { Header } from '@/components/Header'
+import { ScrollProgress } from '@/components/ScrollProgress'
+import { BackToTop } from '@/components/BackToTop'
 import Link from 'next/link'
 
 const STORAGE_KEY = 'libra_access_token'
@@ -80,6 +82,7 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
 export function PublicShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith('/admin')
+  const isPublic = pathname === '/pitch'
   const [authed, setAuthed] = useState<boolean | null>(null) // null = checking
 
   useEffect(() => {
@@ -111,17 +114,24 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
     return <>{children}</>
   }
 
-  // Still checking auth
-  if (authed === null) {
+  // Splash screen while checking auth (skip for public pages)
+  if (authed === null && !isPublic) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f6f6f9]">
-        <p className="text-ink-400 font-mono text-sm">Cargando...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-ink-950">
+        <h1 className="font-serif text-3xl font-bold text-white mb-2">
+          Archivo <span className="text-gold-400">Libra</span>
+        </h1>
+        <div className="flex gap-1 mt-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" style={{ animationDelay: '200ms' }} />
+          <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" style={{ animationDelay: '400ms' }} />
+        </div>
       </div>
     )
   }
 
-  // Not authenticated
-  if (!authed) {
+  // Not authenticated (skip for public pages)
+  if (!authed && !isPublic) {
     return <LoginGate onAuth={() => setAuthed(true)} />
   }
 
@@ -133,10 +143,12 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       >
         Ir al contenido
       </a>
+      <ScrollProgress />
       <Header />
       <main id="main-content" className="min-h-screen">
         {children}
       </main>
+      <BackToTop />
 
       {/* FAB — link to /chat */}
       <Link
@@ -158,6 +170,9 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
                 Archivo periodístico de documentos judiciales públicos del caso por el token $LIBRA.
                 Toda la información proviene del expediente del Juzgado Federal N°8.
               </p>
+              <p className="text-[10px] text-ink-500 mt-3 font-mono leading-relaxed">
+                Fuente: Expediente XXXX/2025, Juzgado Federal N°8, Juez Martinez de Giorgi
+              </p>
             </div>
             <div>
               <h4 className="text-xs font-mono uppercase tracking-wide text-ink-500 mb-3">Navegar</h4>
@@ -165,8 +180,9 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
                 <Link href="/historia" className="hover:text-white transition-colors">La historia</Link>
                 <Link href="/evidencia" className="hover:text-white transition-colors">Evidencia clave</Link>
                 <Link href="/explorador" className="hover:text-white transition-colors">Explorar archivo</Link>
-                <Link href="/red" className="hover:text-white transition-colors">Red de conexiones</Link>
+                <Link href="/entidades" className="hover:text-white transition-colors">Entidades extraídas</Link>
                 <Link href="/datos" className="hover:text-white transition-colors">Datos y estadísticas</Link>
+                <Link href="/red" className="hover:text-white transition-colors">Red de conexiones</Link>
               </nav>
             </div>
             <div>
@@ -181,8 +197,8 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             <p className="text-[10px] font-mono uppercase tracking-widest text-ink-600">
               Archivo Libra — Documentos de acceso público
             </p>
-            <p className="text-[10px] text-ink-600">
-              Los documentos provienen del expediente judicial público. Sin edición ni interpretación.
+            <p className="text-[10px] text-ink-600 bg-ink-900/50 px-3 py-1.5 rounded border border-ink-800">
+              Sin edición ni interpretación. Reproducción textual del expediente judicial.
             </p>
           </div>
         </div>

@@ -5,6 +5,7 @@ import type { PersonData } from '@/components/PersonCard'
 import { ScrollReveal } from '@/components/ScrollReveal'
 import { TimelineDot } from '@/components/TimelineDot'
 import { PulseIndicator } from '@/components/PulseIndicator'
+import { HeroStats } from '@/components/HeroStats'
 import { createClient } from '@/lib/supabase'
 
 const PERSONS: Omit<PersonData, 'docCount'>[] = [
@@ -64,39 +65,31 @@ export default async function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-ink-950 text-white">
-        <div className="max-w-4xl mx-auto px-4 pt-20 pb-16 text-center">
-          <h1 className="font-serif text-4xl sm:text-6xl font-bold mb-4 leading-[1.05]">
+      <section className="bg-ink-950 text-white relative overflow-hidden">
+        {/* Radial spotlight */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(250,204,21,0.06)_0%,transparent_70%)]" />
+        <div className="max-w-4xl mx-auto px-4 pt-20 pb-16 text-center relative">
+          <h1 className="font-serif text-4xl sm:text-6xl font-bold mb-4 leading-[1.05] animate-fade-up">
             Archivo <span className="text-gold-400">Libra</span>
           </h1>
-          <p className="text-lg text-ink-300 max-w-xl mx-auto mb-10">
+          <p className="text-lg text-ink-300 max-w-xl mx-auto mb-10 animate-fade-up delay-100">
             <span className="inline-flex items-center gap-2">
               <PulseIndicator color="gold" />
               {totalDocs.toLocaleString('es-AR')} documentos judiciales
             </span>{' '}
-            de la causa por el criptoescándalo presidencial.
+            del mayor criptoescándalo presidencial de la historia argentina.
             Llamadas, chats, contratos y peritajes.
           </p>
-          <SearchHero />
-          <p className="text-sm text-ink-500 mt-3">Buscá por nombre, fecha o palabra clave</p>
+          <div className="animate-fade-up delay-200">
+            <SearchHero />
+            <p className="text-sm text-ink-500 mt-3">Buscá por nombre, fecha o palabra clave</p>
+          </div>
 
           {/* Separator */}
           <div className="max-w-xl mx-auto border-t border-ink-800/30 my-4" />
 
-          {/* Stats row */}
-          <div className="flex justify-center gap-8 sm:gap-12 text-center mt-8 pt-4">
-            {[
-              { value: '$4.5B', label: 'Capitalización pico' },
-              { value: '$251M', label: 'Pérdidas estimadas' },
-              { value: '75K', label: 'Afectados' },
-              { value: '206', label: 'Llamadas la noche del 14/02' },
-            ].map(({ value, label }) => (
-              <div key={label}>
-                <p className="text-xl sm:text-2xl font-bold text-gold-400 font-mono">{value}</p>
-                <p className="text-[10px] text-ink-500 uppercase tracking-wide font-mono mt-0.5">{label}</p>
-              </div>
-            ))}
-          </div>
+          {/* Stats row — animated */}
+          <HeroStats />
         </div>
       </section>
 
@@ -109,6 +102,33 @@ export default async function Home() {
             75.000 víctimas. 251 millones de dólares en pérdidas.
             Un tuit presidencial borrado a medianoche.&rdquo;
           </p>
+        </div>
+      </section>
+
+      {/* Por qué importa */}
+      <section className="max-w-3xl mx-auto px-4 pb-12">
+        <ScrollReveal>
+          <h2 className="font-serif text-2xl font-bold text-ink-950 mb-6 text-center">
+            Por qué importa
+          </h2>
+        </ScrollReveal>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[
+            { icon: '🏛️', title: 'Presidencia involucrada', text: 'Es la primera vez que un presidente en ejercicio promociona un activo financiero que colapsa en horas.' },
+            { icon: '💸', title: '75.000 víctimas', text: 'Decenas de miles de personas perdieron sus ahorros confiando en un posteo oficial que fue borrado a medianoche.' },
+            { icon: '📱', title: '206 llamadas en una noche', text: 'Las pericias telefónicas revelan una coordinación frenética entre Olivos, Dallas y Singapur.' },
+            { icon: '📋', title: 'Expediente público', text: 'Este archivo no edita ni interpreta. Reproduce textualmente los documentos del Juzgado Federal N°8.' },
+          ].map((item) => (
+            <ScrollReveal key={item.title}>
+              <div className="flex gap-3 p-4 rounded-xl bg-white border border-ink-100 card-hover">
+                <span className="text-2xl shrink-0">{item.icon}</span>
+                <div>
+                  <h3 className="text-sm font-bold text-ink-900 mb-1">{item.title}</h3>
+                  <p className="text-xs text-ink-500 leading-relaxed">{item.text}</p>
+                </div>
+              </div>
+            </ScrollReveal>
+          ))}
         </div>
       </section>
 
@@ -147,7 +167,7 @@ export default async function Home() {
             <ScrollReveal key={i} delay={i * 80}>
               <Link
                 href={`/explorador?date_from=${event.from}&date_to=${event.to}`}
-                className="flex items-start gap-3 group"
+                className="flex items-start gap-3 group transition-transform hover:translate-x-1"
               >
                 <TimelineDot />
                 <div>

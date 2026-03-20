@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: '/evidencia', label: 'Evidencia' },
   { href: '/explorador', label: 'Archivo' },
   { href: '/entidades', label: 'Entidades' },
+  { href: '/datos', label: 'Datos' },
   { href: '/red', label: 'Conexiones' },
   { href: '/chat', label: 'Asistente' },
 ]
@@ -20,13 +21,13 @@ export function Header() {
   function linkClasses(href: string) {
     const active = pathname === href
     return active
-      ? 'text-ink-950 font-medium'
-      : 'text-ink-500 hover:text-ink-950 transition-colors'
+      ? 'text-ink-950 font-medium border-b-2 border-gold-400 pb-0.5'
+      : 'text-ink-500 hover:text-ink-950 transition-colors border-b-2 border-transparent pb-0.5'
   }
 
   return (
     <header className="border-b border-ink-200 bg-white">
-      <div className="h-0.5 bg-gold-400" />
+      <div className="h-1 bg-gradient-to-r from-gold-400 to-gold-500" />
       <nav className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <span className="font-serif text-xl font-bold text-ink-950">Archivo Libra</span>

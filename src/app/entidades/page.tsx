@@ -57,7 +57,18 @@ function EntityDetail({ entityId }: { entityId: string }) {
       .finally(() => setLoading(false))
   }, [entityId])
 
-  if (loading) return <p className="text-ink-400 text-sm p-6">Cargando...</p>
+  if (loading) return (
+    <div className="p-6 space-y-4">
+      <div className="skeleton h-4 w-24" />
+      <div className="skeleton h-6 w-48" />
+      <div className="skeleton h-3 w-32" />
+      <div className="space-y-2 mt-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="skeleton h-20 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+  )
   if (!data) return <p className="text-red-500 text-sm p-6">Error cargando entidad.</p>
 
   const { entity, documents } = data
@@ -208,7 +219,18 @@ export default function EntidadesPage() {
             </div>
             <div className="max-h-[70vh] overflow-y-auto">
               {loading ? (
-                <p className="text-ink-400 text-sm p-4">Cargando...</p>
+                <div className="p-4 space-y-3">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="skeleton w-8 h-8 rounded-full shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="skeleton h-3.5 w-3/4" />
+                        <div className="skeleton h-2.5 w-1/2" />
+                      </div>
+                      <div className="skeleton w-8 h-5 rounded-full shrink-0" />
+                    </div>
+                  ))}
+                </div>
               ) : entities.length === 0 ? (
                 <p className="text-ink-400 text-sm p-4">No se encontraron entidades.</p>
               ) : (
