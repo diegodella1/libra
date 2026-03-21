@@ -92,12 +92,12 @@ export default function Pitch() {
             Para medios y redacciones
           </p>
           <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-[1.08] animate-fade-up delay-100">
-            Convertimos expedientes en{' '}
-            <span className="text-gold-400">plataformas de investigación</span>
+            Danos tus documentos.{' '}
+            <span className="text-gold-400">Te devolvemos una plataforma.</span>
           </h1>
           <p className="text-lg text-ink-300 max-w-2xl mx-auto mb-10 animate-fade-up delay-200 leading-relaxed">
-            Vos tenés la data. Nosotros la convertimos en un producto periodístico
-            que tu redacción usa para investigar y tu público puede explorar.
+            Convertimos expedientes judiciales en un producto periodístico llave en mano:
+            herramienta de investigación para tu redacción + landing pública para tu audiencia.
           </p>
           <div className="flex gap-4 justify-center flex-wrap animate-fade-up delay-300">
             <a
@@ -189,15 +189,46 @@ export default function Pitch() {
         </div>
       </section>
 
-      {/* Quote / prueba social */}
-      <section className="bg-ink-50 py-14">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="border-l-4 border-gold-400 pl-6 py-3">
-            <p className="text-lg text-ink-700 italic font-serif leading-relaxed">
-              &ldquo;Archivo Libra tiene {'>'}800 documentos judiciales indexados
-              con búsqueda, IA, red de conexiones y visualizaciones.
-              Lo construimos como prueba de concepto. Ahora lo ofrecemos como servicio.&rdquo;
-            </p>
+      {/* Dos productos en uno */}
+      <section className="bg-ink-50 py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-ink-950 mb-3 text-center">
+            Dos productos en uno
+          </h2>
+          <p className="text-ink-400 text-sm mb-10 text-center max-w-xl mx-auto">
+            Un mismo archivo, dos experiencias distintas
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="border border-ink-200 rounded-xl p-6 bg-white">
+              <p className="text-gold-500 font-mono text-xs tracking-widest uppercase mb-3">Para tu redacción</p>
+              <h3 className="text-lg font-bold text-ink-900 mb-3">Herramienta de investigación interna</h3>
+              <ul className="space-y-2 text-sm text-ink-600">
+                <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">+</span>Búsqueda full-text sobre todo el expediente</li>
+                <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">+</span>Asistente IA que responde citando documentos</li>
+                <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">+</span>Red de conexiones entre personas y entidades</li>
+                <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">+</span>Dashboards y líneas de tiempo</li>
+                <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">+</span>Acceso restringido a tu equipo</li>
+              </ul>
+            </div>
+            <div className="border border-gold-300 rounded-xl p-6 bg-white">
+              <p className="text-gold-500 font-mono text-xs tracking-widest uppercase mb-3">Para tu audiencia</p>
+              <h3 className="text-lg font-bold text-ink-900 mb-3">Landing pública de cara al público</h3>
+              <ul className="space-y-2 text-sm text-ink-600">
+                <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">+</span>Explorador de documentos navegable</li>
+                <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">+</span>Cronología interactiva de los hechos</li>
+                <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">+</span>Personas clave y evidencia destacada</li>
+                <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">+</span>Con tu marca, tu dominio, tu historia</li>
+                <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">+</span>Un producto periodístico que genera tráfico</li>
+              </ul>
+            </div>
+          </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/"
+              className="text-sm text-gold-600 hover:text-gold-700 underline underline-offset-4 transition-colors"
+            >
+              Mirá el demo en vivo — así queda
+            </Link>
           </div>
         </div>
       </section>
@@ -240,11 +271,11 @@ export default function Pitch() {
       <section className="bg-ink-950 text-white py-20">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-3">
-            Tu expediente merece mejor que una carpeta de Drive
+            Tu próxima investigación merece más que una carpeta de Drive
           </h2>
           <p className="text-ink-400 text-sm mb-8 max-w-lg mx-auto">
-            Escribinos con los detalles de tu caso y te armamos una propuesta.
-            Primeras dos consultas sin compromiso.
+            Mandanos el expediente. En días te devolvemos una plataforma
+            que tu redacción va a usar todos los días y tu público va a explorar.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <a
